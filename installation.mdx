@@ -1,0 +1,263 @@
+---
+title: Installation
+description: Install Fastfist and set up your Neovim development environment
+---
+
+## Prerequisites
+
+Before installing Fastfist, ensure you have the following installed on your system:
+
+### Required
+
+- **Neovim 0.8+**: Fastfist requires Neovim version 0.8 or higher for Lua API support
+- **Git**: Required for cloning the repository and plugin management
+- **Node.js**: Required for LSP servers and some plugins
+- **A Nerd Font**: Required for icons in the UI (recommended: JetBrainsMono Nerd Font, Fira Code Nerd Font)
+
+### Optional but recommended
+
+- **ripgrep**: Required for Telescope live_grep functionality
+- **fd**: Faster file finding for Telescope
+- **Nushell**: Required for Nushell integration features
+- **Rust toolchain**: Required for Rust development features
+
+<Note>
+  You can check your Neovim version by running `nvim --version` in your terminal.
+</Note>
+
+## Installation steps
+
+<Steps>
+  <Step title="Backup your existing configuration">
+    If you have an existing Neovim configuration, back it up before proceeding:
+
+    ```bash
+    mv ~/.config/nvim ~/.config/nvim.backup
+    mv ~/.local/share/nvim ~/.local/share/nvim.backup
+    ```
+
+    <Warning>
+      This step is critical if you have an existing configuration you want to preserve. Fastfist will replace your current Neovim setup.
+    </Warning>
+  </Step>
+
+  <Step title="Clone the Fastfist repository">
+    Clone the Fastfist configuration to your Neovim config directory:
+
+    ```bash
+    git clone <repository-url> ~/.config/nvim
+    ```
+
+    Replace `<repository-url>` with the actual repository URL.
+  </Step>
+
+  <Step title="Install Packer plugin manager">
+    Fastfist uses Packer for plugin management. Install it with:
+
+    ```bash
+    git clone --depth 1 https://github.com/wbthomason/packer.nvim\
+     ~/.local/share/nvim/site/pack/packer/start/packer.nvim
+    ```
+
+    Packer is defined in `lua/fastfist/packer.lua` and manages all plugin installations.
+  </Step>
+
+  <Step title="Launch Neovim and install plugins">
+    Start Neovim and run the PackerSync command to install all plugins:
+
+    ```bash
+    nvim
+    ```
+
+    Then inside Neovim, run:
+
+    ```vim
+    :PackerSync
+    ```
+
+    This will install all plugins defined in the configuration. The process may take a few minutes depending on your internet connection.
+
+    <Note>
+      You can also use the keybinding `<leader>s` to run PackerSync, where leader is the space key.
+    </Note>
+  </Step>
+
+  <Step title="Restart Neovim">
+    After Packer finishes installing plugins, quit and restart Neovim:
+
+    ```vim
+    :qa
+    ```
+
+    Then launch Neovim again:
+
+    ```bash
+    nvim
+    ```
+  </Step>
+
+  <Step title="Install Treesitter parsers">
+    Treesitter parsers should install automatically, but you can manually ensure they're installed:
+
+    ```vim
+    :TSUpdate
+    ```
+
+    This will install parsers for C, Lua, Rust, TypeScript, JavaScript, Solidity, and Nushell as configured in `after/plugin/treesitter.lua`.
+  </Step>
+
+  <Step title="Install language servers with Mason">
+    Open Mason to install language servers for your preferred languages:
+
+    ```vim
+    :Mason
+    ```
+
+    In the Mason UI:
+    - Navigate with `j` and `k`
+    - Press `i` to install a language server
+    - Press `X` to uninstall
+    - Press `u` to update
+    - Press `q` to close
+
+    Recommended language servers:
+    - **rust_analyzer**: Rust language server
+    - **tsserver**: TypeScript/JavaScript language server  
+    - **pyright**: Python language server
+    - **lua_ls**: Lua language server
+    - **yamlls**: YAML language server (configured with Kubernetes schemas)
+
+    <Note>
+      Mason will automatically configure installed language servers thanks to the lsp-zero integration in `after/plugin/lsp.lua`.
+    </Note>
+  </Step>
+</Steps>
+
+## Post-installation configuration
+
+### Configure formatters
+
+Fastfist uses conform.nvim for code formatting. To use formatters, install them on your system:
+
+```bash
+# For Lua
+npm install -g @johnnymorganz/stylua-bin
+
+# For JavaScript/TypeScript
+npm install -g prettier
+
+# For Python
+pip install black isort
+
+# Rust formatting (comes with Rust toolchain)
+rustup component add rustfmt
+```
+
+Formatters are configured in `lua/fastfist/packer.lua` and can be triggered with `<leader>f`.
+
+### Configure Nushell integration (optional)
+
+If you want to use the Nushell integration features, install Nushell:
+
+```bash
+# macOS
+brew install nushell
+
+# Linux
+cargo install nu
+
+# Or download from https://www.nushell.sh
+```
+
+The Nushell integration allows you to execute Nushell commands directly from Neovim with `<C-n>`.
+
+### Set up AI completion (optional)
+
+Fastfist includes Codeium for AI-powered code completion:
+
+1. Open Neovim
+2. Run `:Codeium Auth`
+3. Follow the authentication flow in your browser
+4. Return to Neovim and start coding
+
+AI suggestions will appear automatically and can be accepted with `<M-CR>` (Alt+Enter).
+
+## Verify installation
+
+To verify your installation is working correctly:
+
+<Steps>
+  <Step title="Check plugin installation">
+    Run `:PackerStatus` to see all installed plugins. All plugins should show as installed with no errors.
+  </Step>
+
+  <Step title="Check LSP status">
+    Open a file in a language you installed an LSP server for, then run:
+
+    ```vim
+    :LspInfo
+    ```
+
+    You should see the language server attached and running.
+  </Step>
+
+  <Step title="Test Telescope">
+    Press `<C-p>` to open Telescope file finder. You should see a fuzzy finder interface.
+  </Step>
+
+  <Step title="Test Treesitter">
+    Run `:TSInstallInfo` to see installed parsers. Verify your languages are listed.
+  </Step>
+</Steps>
+
+## Troubleshooting
+
+### Plugins not installing
+
+If plugins fail to install:
+
+1. Check your internet connection
+2. Run `:PackerClean` to remove any partial installations
+3. Run `:PackerSync` again
+4. Check `:messages` for error details
+
+### LSP not working
+
+If language servers aren't working:
+
+1. Verify the server is installed: `:Mason`
+2. Check LSP status: `:LspInfo`
+3. Verify Node.js is installed: `node --version`
+4. Try manually starting the server: `:LspStart`
+
+### Icons not displaying
+
+If you see empty boxes instead of icons:
+
+1. Install a Nerd Font from [nerdfonts.com](https://www.nerdfonts.com/)
+2. Configure your terminal to use the Nerd Font
+3. Restart your terminal and Neovim
+
+### Treesitter errors
+
+If you get Treesitter parser errors:
+
+1. Ensure you have a C compiler installed (gcc, clang, or MSVC)
+2. Run `:TSUpdate` to rebuild parsers
+3. Check `:messages` for compiler errors
+
+<Warning>
+  If you encounter persistent issues, check the plugin documentation or open an issue in the repository.
+</Warning>
+
+## Next steps
+
+Now that Fastfist is installed, learn how to use it effectively:
+
+<Card
+  title="Quick start guide"
+  icon="rocket"
+  href="/quickstart"
+>
+  Learn essential keybindings and workflows to get productive immediately
+</Card>

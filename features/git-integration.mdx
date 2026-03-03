@@ -1,0 +1,267 @@
+---
+title: Git Integration
+description: Complete Git workflow with Neogit, Gitsigns, and Git Blamer
+---
+
+## Overview
+
+This configuration provides a comprehensive Git integration with three complementary tools:
+
+<CardGroup cols={3}>
+  <Card title="Neogit" icon="git-alt">
+    Magit-like Git interface for commits and staging
+  </Card>
+  <Card title="Gitsigns" icon="code-branch">
+    Inline git diff indicators and hunk operations
+  </Card>
+  <Card title="Blamer" icon="user">
+    Git blame information inline
+  </Card>
+</CardGroup>
+
+## Neogit
+
+Neogit provides a powerful Git interface inspired by Magit, bringing a visual and intuitive way to interact with Git.
+
+### Configuration
+
+```lua ~/workspace/source/after/plugin/neogit.lua
+local neogit = require("neogit")
+
+neogit.setup {
+  integrations = {
+      telescope = true,
+      diffview = true,
+  }
+}
+```
+
+### Opening Neogit
+
+<Tabs>
+  <Tab title="Keybindings">
+    Two keybindings are provided for easy access:
+    
+    ```lua
+    vim.keymap.set("n", "<leader>gs", M.openFloating)
+    vim.keymap.set("n", "<C-g>", M.openFloating)
+    ```
+    
+    - `<leader>gs` - Git status (mnemonic: git status)
+    - `<C-g>` - Quick access to git
+  </Tab>
+  
+  <Tab title="Floating Window">
+    ```lua
+    function M.openFloating()
+      neogit.open({ kind = "floating"})
+    end
+    ```
+    
+    Neogit opens in a floating window, keeping your layout intact.
+  </Tab>
+</Tabs>
+
+### Features
+
+<AccordionGroup>
+  <Accordion title="Staging & Unstaging">
+    Inside Neogit:
+    
+    - `s` - Stage file or hunk under cursor
+    - `u` - Unstage file or hunk under cursor
+    - `S` - Stage all changes
+    - `U` - Unstage all changes
+    - `<Tab>` - Toggle diff view for file
+  </Accordion>
+  
+  <Accordion title="Committing">
+    - `c` - Open commit menu
+      - `c` - Create commit
+      - `a` - Amend last commit
+      - `e` - Extend last commit
+      - `w` - Reword last commit
+    
+    The commit interface provides a buffer to write your commit message with syntax highlighting.
+  </Accordion>
+  
+  <Accordion title="Branching & Remotes">
+    - `b` - Branch menu
+      - `b` - Checkout branch
+      - `c` - Create new branch
+      - `d` - Delete branch
+    
+    - `P` - Push menu
+      - `p` - Push to remote
+      - `u` - Push and set upstream
+    
+    - `F` - Pull menu
+      - `p` - Pull from remote
+      - `r` - Pull with rebase
+  </Accordion>
+  
+  <Accordion title="Telescope Integration">
+    With Telescope integration enabled, you can use Telescope's fuzzy finding for:
+    
+    - Branch selection
+    - Remote selection
+    - Commit history
+    
+    This makes navigation through Git objects much faster.
+  </Accordion>
+  
+  <Accordion title="Diffview Integration">
+    Diffview integration provides enhanced diff viewing:
+    
+    - See full file diffs side-by-side
+    - Navigate through changed files
+    - View commit history with diffs
+  </Accordion>
+</AccordionGroup>
+
+## Gitsigns
+
+Gitsigns shows inline indicators for changed, added, and removed lines.
+
+### Configuration
+
+```lua
+require('gitsigns').setup()
+```
+
+### Features
+
+<CardGroup cols={2}>
+  <Card title="Visual Indicators" icon="eye">
+    Inline symbols in the sign column showing:
+    - Added lines (green)
+    - Modified lines (blue)
+    - Removed lines (red)
+  </Card>
+  
+  <Card title="Hunk Operations" icon="code">
+    Navigate and operate on Git hunks:
+    - Jump between changes
+    - Stage individual hunks
+    - Undo hunks
+    - Preview changes
+  </Card>
+</CardGroup>
+
+### Default Keybindings
+
+Gitsigns provides default keybindings (check `:help gitsigns` for full list):
+
+| Keybinding | Action | Description |
+|------------|--------|-------------|
+| `]c` | Next hunk | Jump to next change |
+| `[c` | Previous hunk | Jump to previous change |
+| `<leader>hs` | Stage hunk | Stage hunk under cursor |
+| `<leader>hr` | Reset hunk | Undo changes in hunk |
+| `<leader>hS` | Stage buffer | Stage all changes in file |
+| `<leader>hu` | Undo stage hunk | Unstage hunk |
+| `<leader>hR` | Reset buffer | Undo all changes in file |
+| `<leader>hp` | Preview hunk | Show diff in floating window |
+| `<leader>hb` | Blame line | Show blame for current line |
+
+<Warning>
+  Resetting hunks or buffers (`<leader>hr`, `<leader>hR`) will discard your changes. Use with caution!
+</Warning>
+
+## Git Blamer
+
+Blamer shows Git blame information inline as you edit.
+
+### Configuration
+
+```lua ~/workspace/source/after/plugin/blamer.lua
+vim.g.blamer_enabled = 1
+```
+
+### Features
+
+<CardGroup cols={2}>
+  <Card title="Inline Blame" icon="user-circle">
+    Shows commit info at the end of the current line:
+    - Author name
+    - Commit message
+    - Relative time
+  </Card>
+  
+  <Card title="Always On" icon="toggle-on">
+    Enabled by default, showing blame info as you navigate
+  </Card>
+</CardGroup>
+
+<Note>
+  The blame information appears after a short delay to avoid being distracting while typing.
+</Note>
+
+## Complete Git Workflow
+
+<Steps>
+  <Step title="Make changes">
+    Edit your files. Gitsigns will show inline indicators for changes.
+  </Step>
+  
+  <Step title="Review changes">
+    - Use `]c` / `[c` to jump between changes
+    - Use `<leader>hp` to preview hunks
+    - Blame information shows who last modified each line
+  </Step>
+  
+  <Step title="Stage changes">
+    Open Neogit with `<leader>gs` or `<C-g>`:
+    - Navigate with `j` / `k`
+    - Press `s` to stage files or hunks
+    - Press `<Tab>` to expand diffs
+  </Step>
+  
+  <Step title="Commit">
+    - Press `c` then `c` in Neogit
+    - Write your commit message
+    - Save and close to commit
+  </Step>
+  
+  <Step title="Push">
+    - Press `P` then `p` to push
+    - Or use your terminal/external Git client
+  </Step>
+</Steps>
+
+## Tips
+
+<Tip>
+  **Quick staging**: For small changes, use Gitsigns `<leader>hs` to stage hunks without opening Neogit.
+</Tip>
+
+<Tip>
+  **Visual mode staging**: In Neogit, you can use visual mode to select specific lines within a hunk to stage.
+</Tip>
+
+<Tip>
+  **Blame integration**: When you see interesting blame info, press `<leader>gs` to open Neogit and explore the commit history.
+</Tip>
+
+## Integrations
+
+### Telescope + Neogit
+
+<CodeGroup>
+```lua Configuration
+integrations = {
+    telescope = true,
+    diffview = true,
+}
+```
+</CodeGroup>
+
+- Use Telescope's fuzzy finding in Neogit menus
+- Quick branch switching with search
+- Fast commit history navigation
+
+### Diffview + Neogit
+
+- Side-by-side diff viewing
+- File history with diffs
+- Enhanced merge conflict resolution

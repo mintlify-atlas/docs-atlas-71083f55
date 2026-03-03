@@ -1,0 +1,211 @@
+---
+title: LSP Configuration
+description: Language Server Protocol setup with Mason, nvim-cmp, and multiple language servers
+---
+
+## Overview
+
+This configuration uses `lsp-zero` for streamlined LSP setup, with Mason for managing language servers and nvim-cmp for intelligent code completion.
+
+## LSP Servers
+
+The configuration supports multiple language servers managed through Mason:
+
+<CardGroup cols={2}>
+  <Card title="Rust Analyzer" icon="rust">
+    Configured with clippy for enhanced linting
+  </Card>
+  <Card title="YAML Language Server" icon="file-code">
+    Integrated with yaml-companion for Kubernetes schemas
+  </Card>
+  <Card title="Auto-Install" icon="download">
+    Mason automatically suggests and installs LSP servers
+  </Card>
+  <Card title="Custom Filetypes" icon="file">
+    Support for Go templates, MDX, and Helm charts
+  </Card>
+</CardGroup>
+
+## Setup
+
+### Mason Configuration
+
+```lua
+require "mason".setup()
+require("mason-lspconfig").setup()
+```
+
+Mason provides a simple interface to install and manage LSP servers, formatters, and linters.
+
+### LSP Zero Preset
+
+The configuration uses the minimal preset with sensible defaults:
+
+```lua ~/workspace/source/after/plugin/lsp.lua
+local lsp = require "lsp-zero".preset({
+    name = "minimal",
+    set_lsp_keymaps = true,
+    manage_nvim_cmp = true,
+    suggest_lsp_servers = true,
+})
+```
+
+## Completion (nvim-cmp)
+
+### Insert Mode Mappings
+
+<Tabs>
+  <Tab title="Navigation">
+    ```lua
+    ['<C-p>'] = cmp.mapping.select_prev_item(cmp_select)
+    ['<C-n>'] = cmp.mapping.select_next_item(cmp_select)
+    ['<C-e>'] = cmp.mapping.scroll_docs(-4)
+    ['<C-y>'] = cmp.mapping.scroll_docs(4)
+    ```
+    
+    - `<C-p>` / `<C-n>` - Navigate through completion items
+    - `<C-e>` / `<C-y>` - Scroll documentation up/down
+  </Tab>
+  <Tab title="Actions">
+    ```lua
+    ['<CR>'] = cmp.mapping.confirm({ select = true })
+    ['<C-Space>'] = cmp.mapping.complete()
+    ```
+    
+    - `<CR>` - Confirm selection
+    - `<C-Space>` - Trigger completion manually
+  </Tab>
+</Tabs>
+
+### Command Line Completion
+
+```lua ~/workspace/source/after/plugin/lsp.lua
+-- Search completion
+cmp.setup.cmdline('/', {
+    mapping = cmp.mapping.preset.cmdline(),
+    sources = {
+        { name = 'buffer' },
+    }
+})
+
+-- Command completion
+cmp.setup.cmdline(':', {
+    mapping = cmp.mapping.preset.cmdline(),
+    sources = {
+        { name = 'path' },
+        { name = 'cmdline' },
+    }
+})
+```
+
+## LSP Keybindings
+
+All keybindings are set when an LSP attaches to a buffer:
+
+| Keybinding | Action | Description |
+|------------|--------|-------------|
+| `gd` | `vim.lsp.buf.definition` | Go to definition |
+| `K` | `vim.lsp.buf.hover` | Show hover documentation |
+| `gr` | `vim.lsp.buf.references` | Find references |
+| `<leader>ca` | `vim.lsp.buf.code_action` | Show code actions |
+| `<leader>rn` | `vim.lsp.buf.rename` | Rename symbol |
+| `<F2>` | `vim.lsp.buf.rename` | Rename symbol (alternative) |
+| `<leader>vws` | `vim.lsp.buf.workspace_symbol` | Search workspace symbols |
+| `<leader>vd` | `vim.diagnostic.open_float` | Show diagnostic in float |
+| `]d` | `vim.diagnostic.goto_next` | Next diagnostic |
+| `[d` | `vim.diagnostic.goto_prev` | Previous diagnostic |
+| `<leader>f` | `conform.format` | Format buffer |
+
+<Note>
+  Visual mode: `<leader>a` triggers code actions for the selected range
+</Note>
+
+## Language-Specific Configuration
+
+### Rust
+
+```lua ~/workspace/source/after/plugin/lsp.lua
+lsp.configure("rust_analyzer", {
+    settings = {
+        ["rust-analyzer"] = {
+            check = {
+                command = "clippy",
+            },
+        },
+    }
+})
+```
+
+Rust analyzer is configured to use clippy for more comprehensive linting.
+
+<Accordion title="Additional Rust-specific keybindings">
+  When rust-tools is configured:
+  
+  - `K` - Enhanced hover actions with rust-tools
+  - `<leader>t` - Open Cargo.toml
+</Accordion>
+
+### YAML with Kubernetes Support
+
+```lua ~/workspace/source/after/plugin/lsp.lua
+local M = {
+  k8s_schemas = {
+    {
+      name = 'Kubernetes 1.27.12',
+      uri = 'https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/v1.27.12-standalone-strict/all.json',
+    },
+    {
+      name = 'Kubernetes 1.26.14',
+      uri = 'https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/v1.26.14-standalone-strict/all.json',
+    },
+  },
+}
+
+local yaml_cfg = require('yaml-companion').setup {
+    builtin_matchers = {
+        kubernetes = { enabled = true },
+    },
+    schemas = M.all_schemas,
+}
+
+lsp.configure("yamlls", yaml_cfg)
+```
+
+YAML language server with automatic Kubernetes schema detection.
+
+## Custom Filetypes
+
+```lua ~/workspace/source/after/plugin/lsp.lua
+vim.filetype.add({
+    extension = {
+        gotmpl = 'gotmpl',
+        mdx    = 'mdx',
+    },
+    pattern = {
+        [".*/templates/.*%.tpl"] = "helm",
+        [".*/templates/.*%.ya?ml"] = "helm",
+        ["helmfile.*%.ya?ml"] = "helm",
+    },
+})
+```
+
+## Diagnostics
+
+```lua ~/workspace/source/after/plugin/lsp.lua
+vim.diagnostic.config({
+    virtual_text = true,
+})
+```
+
+Diagnostics are displayed inline with virtual text enabled.
+
+## AI Completion
+
+<Info>
+  The configuration includes support for Codeium with `<M-CR>` to accept suggestions.
+</Info>
+
+```lua ~/workspace/source/after/plugin/lsp.lua
+vim.api.nvim_set_keymap('i', '<M-CR>', 'codeium#Accept()', 
+  { expr=true, noremap = true, silent = true })
+```

@@ -1,80 +1,440 @@
 ---
-title: "Quickstart"
-description: "Start building awesome documentation in minutes"
+title: Quick start
+description: Get productive with Fastfist in minutes with essential keybindings and workflows
 ---
 
-## Get started in three steps
+## Leader key
 
-Get your documentation site running locally and make your first customization.
+The leader key is your gateway to most Fastfist commands. It's configured as the **space bar** in `lua/fastfist/remap.lua`:
 
-### Step 1: Set up your local environment
+```lua lua/fastfist/remap.lua
+vim.g.mapleader = " "
+```
 
-<AccordionGroup>
-  <Accordion icon="copy" title="Clone your docs locally">
-    During the onboarding process, you created a GitHub repository with your docs content if you didn't already have one. You can find a link to this repository in your [dashboard](https://dashboard.mintlify.com).
-    
-    To clone the repository locally so that you can make and preview changes to your docs, follow the [Cloning a repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) guide in the GitHub docs.
-  </Accordion>
-  <Accordion icon="rectangle-terminal" title="Start the preview server">
-    1. Install the Mintlify CLI: `npm i -g mint`
-    2. Navigate to your docs directory and run: `mint dev`
-    3. Open `http://localhost:3000` to see your docs live!
-    
-    <Tip>Your preview updates automatically as you edit files.</Tip>
-  </Accordion>
-</AccordionGroup>
+Whenever you see `<leader>` in a keybinding, press the space bar.
 
-### Step 2: Deploy your changes
+## Essential navigation
 
-<AccordionGroup>
-  <Accordion icon="github" title="Install our GitHub app">
-    Install the Mintlify GitHub app from your [dashboard](https://dashboard.mintlify.com/settings/organization/github-app).
-    
-    Our GitHub app automatically deploys your changes to your docs site, so you don't need to manage deployments yourself.
-</Accordion>
-<Accordion icon="palette" title="Update your site name and colors">
-    For a first change, let's update the name and colors of your docs site.
+### File finding with Telescope
 
-    1. Open `docs.json` in your editor.
-    2. Change the `"name"` field to your project name.
-    3. Update the `"colors"` to match your brand.
-    4. Save and see your changes instantly at `http://localhost:3000`.
+Telescope is your primary tool for navigating files and searching content.
 
-    <Tip>Try changing the primary color to see an immediate difference!</Tip>
-  </Accordion>
-</AccordionGroup>
+<CodeGroup>
+```lua after/plugin/telescope.lua
+local builtin = require('telescope.builtin')
+vim.keymap.set('n', '<C-p>', builtin.find_files, {})
+vim.keymap.set('n', '<C-_>', builtin.live_grep, {})
+vim.keymap.set('n', '<C-;>', builtin.live_grep, {})
+```
+</CodeGroup>
 
-### Step 3: Go live
+**Key bindings:**
 
-<Accordion icon="rocket" title="Publish your docs">
-  1. Commit and push your changes.
-  2. Your docs will update and be live in moments!
-</Accordion>
+- `<C-p>`: Open file finder - Fuzzy search for files in your project
+- `<C-;>` or `<C-/>`: Live grep - Search for text across all files in your project
+
+**Inside Telescope:**
+
+- Type to filter results
+- `<C-n>` / `<C-p>`: Navigate down/up through results
+- `<CR>`: Open selected file
+- `<Esc>`: Close Telescope
+
+<Note>
+  Telescope requires ripgrep for live_grep functionality. Install it with your package manager if search isn't working.
+</Note>
+
+### Quick file access with Harpoon
+
+Harpoon lets you mark files and jump between them instantly - perfect for working with a small set of related files.
+
+<CodeGroup>
+```lua after/plugin/harpoon.lua
+local mark = require("harpoon.mark")
+local ui = require("harpoon.ui")
+
+vim.keymap.set("n", "<leader>m", mark.add_file)
+vim.keymap.set("n", "<S-m>", ui.toggle_quick_menu)
+
+vim.keymap.set("n", "<leader>ma", function() ui.nav_file(1) end)
+vim.keymap.set("n", "<leader>ms", function() ui.nav_file(2) end)
+vim.keymap.set("n", "<leader>md", function() ui.nav_file(3) end)
+vim.keymap.set("n", "<leader>mf", function() ui.nav_file(4) end)
+```
+</CodeGroup>
+
+**Key bindings:**
+
+- `<leader>m`: Mark current file
+- `<Shift-m>`: Open Harpoon menu to see all marked files
+- `<leader>ma`: Jump to first marked file
+- `<leader>ms`: Jump to second marked file
+- `<leader>md`: Jump to third marked file
+- `<leader>mf`: Jump to fourth marked file
+
+**Workflow:**
+
+1. Open a file you'll work with frequently
+2. Press `<leader>m` to mark it
+3. Repeat for up to 4 files
+4. Use `<leader>ma/s/d/f` to instantly jump between marked files
+
+### File tree with Neo-tree
+
+Browse your project structure visually with Neo-tree.
+
+<CodeGroup>
+```lua after/plugin/neo-tree.lua
+vim.keymap.set("n", "<leader>n", ":Neotree toggle<cr>")
+```
+</CodeGroup>
+
+**Key bindings:**
+
+- `<leader>n`: Toggle Neo-tree file browser
+
+**Inside Neo-tree:**
+
+- `j` / `k`: Navigate down/up
+- `<CR>`: Open file or expand directory
+- `a`: Create new file
+- `d`: Delete file
+- `r`: Rename file
+- `q`: Close Neo-tree
+
+## LSP features
+
+Fastfist includes powerful LSP integration for intelligent code navigation and editing.
+
+### Code navigation
+
+<CodeGroup>
+```lua after/plugin/lsp.lua
+vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts)
+vim.keymap.set("n", "gr", vim.lsp.buf.references, opts)
+vim.keymap.set("n", "K", vim.lsp.buf.hover, opts)
+```
+</CodeGroup>
+
+**Key bindings:**
+
+- `gd`: Go to definition - Jump to where a symbol is defined
+- `gr`: Find references - See all places where a symbol is used
+- `K`: Hover documentation - Show documentation for symbol under cursor
+
+**Workflow example:**
+
+1. Place cursor on a function name
+2. Press `K` to see its documentation
+3. Press `gd` to jump to its definition
+4. Press `gr` to see everywhere it's called
+
+### Code editing
+
+<CodeGroup>
+```lua after/plugin/lsp.lua
+vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, opts)
+vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename, opts)
+vim.keymap.set("n", "<F2>", vim.lsp.buf.rename, opts)
+vim.keymap.set("n", "<leader>f", conform.format)
+```
+</CodeGroup>
+
+**Key bindings:**
+
+- `<leader>ca`: Code actions - Show available quick fixes and refactorings
+- `<leader>rn` or `<F2>`: Rename symbol - Rename across entire project
+- `<leader>f`: Format file - Auto-format current file
+
+**Rename workflow:**
+
+1. Place cursor on variable/function name
+2. Press `<leader>rn`
+3. Type new name
+4. Press `<CR>` - All references are updated automatically
+
+### Diagnostics
+
+<CodeGroup>
+```lua after/plugin/lsp.lua
+vim.keymap.set("n", "<leader>vd", vim.diagnostic.open_float, opts)
+vim.keymap.set("n", "]d", vim.diagnostic.goto_next, opts)
+vim.keymap.set("n", "[d", vim.diagnostic.goto_prev, opts)
+```
+</CodeGroup>
+
+**Key bindings:**
+
+- `<leader>vd`: Show diagnostic details - View error/warning details in floating window
+- `]d`: Next diagnostic - Jump to next error/warning
+- `[d`: Previous diagnostic - Jump to previous error/warning
+
+### Autocompletion
+
+Autocompletion appears automatically as you type. The configuration is in `after/plugin/lsp.lua`:
+
+<CodeGroup>
+```lua after/plugin/lsp.lua
+cmp.setup({
+    mapping = cmp.mapping.preset.insert({
+        ['<C-e>'] = cmp.mapping.scroll_docs(-4),
+        ['<C-y>'] = cmp.mapping.scroll_docs(4),
+        ['<C-p>'] = cmp.mapping.select_prev_item(cmp_select),
+        ['<C-n>'] = cmp.mapping.select_next_item(cmp_select),
+        ['<CR>'] = cmp.mapping.confirm({ select = true }),
+        ['<C-Space>'] = cmp.mapping.complete(),
+    })
+})
+```
+</CodeGroup>
+
+**Key bindings (in insert mode):**
+
+- `<C-n>`: Next completion item
+- `<C-p>`: Previous completion item
+- `<CR>`: Accept completion
+- `<C-Space>`: Trigger completion manually
+- `<C-e>` / `<C-y>`: Scroll documentation
+
+<Note>
+  Tab is not used for completion by default. Use `<C-n>` and `<C-p>` to navigate, or `<CR>` to accept.
+</Note>
+
+## Window navigation
+
+Move between split windows effortlessly:
+
+<CodeGroup>
+```lua lua/fastfist/remap.lua
+vim.keymap.set("n", "<C-l>", "<C-W>l")
+vim.keymap.set("n", "<C-h>", "<C-W>h")
+vim.keymap.set("n", "<C-j>", "<C-W>j")
+vim.keymap.set("n", "<C-k>", "<C-W>k")
+```
+</CodeGroup>
+
+**Key bindings:**
+
+- `<C-h>`: Move to left window
+- `<C-j>`: Move to bottom window
+- `<C-k>`: Move to top window
+- `<C-l>`: Move to right window
+
+## Git workflow
+
+### Neogit interface
+
+Neogit provides a Magit-like interface for Git operations.
+
+<CodeGroup>
+```lua after/plugin/neogit.lua
+vim.keymap.set("n", "<leader>gs", M.openFloating)
+vim.keymap.set("n", "<C-g>", M.openFloating)
+```
+</CodeGroup>
+
+**Key bindings:**
+
+- `<leader>gs` or `<C-g>`: Open Neogit status
+
+**Inside Neogit:**
+
+- `s`: Stage/unstage file under cursor
+- `c`: Create commit
+- `P`: Push
+- `p`: Pull
+- `tab`: Expand/collapse section
+- `q`: Close Neogit
+
+**Commit workflow:**
+
+1. Press `<C-g>` to open Neogit
+2. Navigate to changed files
+3. Press `s` to stage files
+4. Press `c` then `c` to commit
+5. Write commit message and save
+6. Press `P` then `p` to push
+
+### Git signs
+
+Gitsigns shows inline Git changes and blame information automatically in the sign column.
+
+## Editing enhancements
+
+### Moving lines
+
+<CodeGroup>
+```lua lua/fastfist/remap.lua
+vim.keymap.set("v", "J", ":m '>+1<CR>gv=gv")
+vim.keymap.set("v", "K", ":m '<-2<CR>gv=gv")
+```
+</CodeGroup>
+
+**Key bindings (in visual mode):**
+
+- `J`: Move selected lines down
+- `K`: Move selected lines up
+
+### Centered scrolling
+
+<CodeGroup>
+```lua lua/fastfist/remap.lua
+vim.keymap.set("n", "<C-d>", "<C-d>zz")
+vim.keymap.set("n", "<C-u>", "<C-u>zz")
+vim.keymap.set("n", "n", "nzzzv")
+vim.keymap.set("n", "N", "Nzzzv")
+```
+</CodeGroup>
+
+**Key bindings:**
+
+- `<C-d>`: Scroll down half page (cursor stays centered)
+- `<C-u>`: Scroll up half page (cursor stays centered)
+- `n`: Next search result (centered)
+- `N`: Previous search result (centered)
+
+### System clipboard
+
+<CodeGroup>
+```lua lua/fastfist/remap.lua
+vim.keymap.set("n", "<leader>y", '"+')  
+vim.keymap.set("x", "<leader>y", '"+y')
+```
+</CodeGroup>
+
+**Key bindings:**
+
+- `<leader>y`: Access system clipboard register
+- `<leader>y` (in visual mode): Yank to system clipboard
+
+**Usage:**
+
+- `<leader>yy`: Yank current line to system clipboard
+- Select text, then `<leader>y`: Yank selection to system clipboard
+
+## Nushell integration
+
+Unique to Fastfist is deep Nushell integration for data exploration.
+
+<CodeGroup>
+```lua lua/fastfist/nushell.lua
+vim.keymap.set("n", "<C-n>", M.run_with_nu, { silent = true, desc = "Run with nushell" })
+vim.keymap.set("n", "<C-s>", M.run_with_zsh, { silent = true, desc = "Run with zsh" })
+vim.keymap.set("n", "<C-f>", M.rerun_last_command, { silent = true, desc = "Rerun last command" })
+```
+</CodeGroup>
+
+**Key bindings:**
+
+- `<C-n>`: Execute current block with Nushell
+- `<C-s>`: Execute current block with Zsh
+- `<C-f>`: Re-run last command
+
+**Usage:**
+
+1. Write Nushell commands in any buffer
+2. Place cursor on or near the command
+3. Press `<C-n>` to execute
+4. View results in floating window
+5. Press `q` or `<Esc>` to close results
+
+## Quick reference
+
+### Most used keybindings
+
+| Key | Action |
+|-----|--------|
+| `<Space>` | Leader key |
+| `<C-p>` | Find files (Telescope) |
+| `<C-;>` | Search in files (live grep) |
+| `<leader>m` | Mark file (Harpoon) |
+| `<Shift-m>` | Harpoon menu |
+| `<leader>n` | Toggle file tree |
+| `<C-g>` | Open Git status (Neogit) |
+| `gd` | Go to definition |
+| `gr` | Find references |
+| `K` | Show hover documentation |
+| `<leader>ca` | Code actions |
+| `<leader>rn` | Rename symbol |
+| `<leader>f` | Format file |
+| `]d` / `[d` | Next/previous diagnostic |
+| `<C-h/j/k/l>` | Navigate windows |
+
+## Additional tools
+
+### Undo tree
+
+Visualize and navigate your undo history:
+
+```vim
+:UndotreeToggle
+```
+
+### Zen mode
+
+Enter distraction-free writing mode:
+
+```vim
+:ZenMode
+```
+
+### Mason LSP installer
+
+Manage language servers:
+
+```vim
+:Mason
+```
+
+### PackerSync
+
+Update plugins:
+
+```vim
+:PackerSync
+```
+
+Or use the keybinding:
+
+<CodeGroup>
+```lua lua/fastfist/remap.lua
+vim.keymap.set("n", "<leader>s", ":PackerSync<CR>")
+```
+</CodeGroup>
+
+- `<leader>s`: Run PackerSync
 
 ## Next steps
 
-Now that you have your docs running, explore these key features:
+Now that you know the basics, explore specific features in depth:
 
 <CardGroup cols={2}>
-
-<Card title="Write Content" icon="pen-to-square" href="/essentials/markdown">
-  Learn MDX syntax and start writing your documentation.
-</Card>
-
-<Card title="Customize style" icon="palette" href="/essentials/settings">
-  Make your docs match your brand perfectly.
-</Card>
-
-<Card title="Add code examples" icon="square-code" href="/essentials/code">
-  Include syntax-highlighted code blocks.
-</Card>
-
-<Card title="API documentation" icon="code" href="/api-reference/introduction">
-  Auto-generate API docs from OpenAPI specs.
-</Card>
-
+  <Card
+    title="LSP configuration"
+    icon="code"
+    href="/features/lsp"
+  >
+    Deep dive into language server setup and customization
+  </Card>
+  <Card
+    title="Telescope"
+    icon="magnifying-glass"
+    href="/features/telescope"
+  >
+    Master advanced Telescope features and custom searches
+  </Card>
+  <Card
+    title="Git integration"
+    icon="git"
+    href="/features/git-integration"
+  >
+    Learn advanced Git workflows with Neogit and Gitsigns
+  </Card>
+  <Card
+    title="Customization"
+    icon="wrench"
+    href="/customization/themes"
+  >
+    Customize Fastfist to match your workflow
+  </Card>
 </CardGroup>
-
-<Note>
-  **Need help?** See our [full documentation](https://mintlify.com/docs) or join our [community](https://mintlify.com/community).
-</Note>

@@ -1,0 +1,224 @@
+---
+title: "Plugin System Overview"
+description: "Understanding Packer plugin manager and how to manage plugins"
+---
+
+## Introduction
+
+This Neovim configuration uses [Packer.nvim](https://github.com/wbthomason/packer.nvim) as the plugin manager. Packer is a modern, use-package inspired plugin manager for Neovim written in Lua.
+
+## Plugin Configuration Location
+
+All plugins are defined in the main Packer configuration file:
+
+```
+~/workspace/source/lua/fastfist/packer.lua
+```
+
+Individual plugin configurations are stored in:
+
+```
+~/workspace/source/after/plugin/
+```
+
+## Packer Setup
+
+The configuration begins by loading Packer and initializing it:
+
+```lua lua/fastfist/packer.lua
+vim.cmd [[packadd packer.nvim]]
+
+return require('packer').startup(function(use)
+    -- Packer can manage itself
+    use 'wbthomason/packer.nvim'
+    
+    -- Additional plugins...
+end)
+```
+
+<Note>
+Packer can manage itself as a plugin, which means you can update Packer using Packer!
+</Note>
+
+## Adding New Plugins
+
+To add a new plugin to your configuration, follow these steps:
+
+<Steps>
+  <Step title="Add the plugin to packer.lua">
+    Open `lua/fastfist/packer.lua` and add your plugin using the `use` function:
+    
+    ```lua
+    -- Simple plugin
+    use 'author/plugin-name'
+    
+    -- Plugin with dependencies
+    use {
+        'author/plugin-name',
+        requires = {
+            'dependency/plugin',
+        }
+    }
+    
+    -- Plugin with configuration
+    use {
+        'author/plugin-name',
+        config = function()
+            require('plugin-name').setup({
+                -- configuration options
+            })
+        end
+    }
+    ```
+  </Step>
+  
+  <Step title="Run PackerSync">
+    Save the file and run `:PackerSync` to install and update plugins:
+    
+    ```vim
+    :PackerSync
+    ```
+    
+    Or use the keybinding:
+    
+    ```
+    <leader>s
+    ```
+  </Step>
+  
+  <Step title="Create plugin configuration (optional)">
+    If your plugin needs additional configuration, create a file in `after/plugin/`:
+    
+    ```bash
+    touch after/plugin/my-plugin.lua
+    ```
+    
+    Add your plugin-specific settings and keybindings there.
+  </Step>
+</Steps>
+
+## PackerSync Workflow
+
+<Card title="PackerSync Command" icon="sync">
+  The `:PackerSync` command performs multiple operations in sequence:
+  
+  1. **Clean** - Removes unused plugins
+  2. **Update** - Updates installed plugins
+  3. **Install** - Installs new plugins
+  4. **Compile** - Compiles the plugin loader
+</Card>
+
+### Available Packer Commands
+
+<AccordionGroup>
+  <Accordion title=":PackerSync">
+    Runs clean, update, and install operations. This is the most commonly used command.
+  </Accordion>
+  
+  <Accordion title=":PackerInstall">
+    Installs new plugins that are not yet installed.
+  </Accordion>
+  
+  <Accordion title=":PackerUpdate">
+    Updates installed plugins to their latest versions.
+  </Accordion>
+  
+  <Accordion title=":PackerClean">
+    Removes plugins that are no longer in your configuration.
+  </Accordion>
+  
+  <Accordion title=":PackerCompile">
+    Regenerates the compiled plugin loader for faster startup times.
+  </Accordion>
+  
+  <Accordion title=":PackerStatus">
+    Shows the status of all plugins.
+  </Accordion>
+</AccordionGroup>
+
+## Plugin Configuration Pattern
+
+This configuration follows a consistent pattern:
+
+<CodeGroup>
+
+```lua Plugin Declaration (packer.lua)
+use {
+    'plugin/name',
+    requires = { 'dependency' },
+    config = function()
+        require('plugin').setup()
+    end
+}
+```
+
+```lua Plugin Configuration (after/plugin/name.lua)
+-- Detailed configuration
+require('plugin').setup({
+    option1 = true,
+    option2 = 'value',
+})
+
+-- Keybindings
+vim.keymap.set('n', '<leader>x', ':PluginCommand<cr>')
+```
+
+</CodeGroup>
+
+<Tip>
+The `after/plugin/` directory is automatically loaded after Neovim starts, making it perfect for plugin-specific configurations.
+</Tip>
+
+## Quick Reference Keybinding
+
+You can quickly sync plugins with this keybinding defined in `lua/fastfist/remap.lua:22`:
+
+```lua
+vim.keymap.set("n", "<leader>s", ":PackerSync<CR>")
+```
+
+<Info>
+Press `<leader>s` (Space + s) to run PackerSync without typing the command.
+</Info>
+
+## Plugin Categories
+
+Plugins in this configuration are organized into several categories:
+
+<CardGroup cols={2}>
+  <Card title="Navigation" icon="compass" href="/plugins/navigation">
+    Telescope, Harpoon, Neo-tree
+  </Card>
+  
+  <Card title="Editing" icon="pencil" href="/plugins/editing">
+    Comment.nvim, vim-sleuth, undotree
+  </Card>
+  
+  <Card title="Visual" icon="palette" href="/plugins/visual">
+    Themes, lualine, indent guides, zen-mode
+  </Card>
+  
+  <Card title="AI & Completion" icon="robot" href="/plugins/ai-completion">
+    Codeium, CodeCompanion
+  </Card>
+</CardGroup>
+
+## Troubleshooting
+
+<Warning>
+If you encounter issues after adding a plugin, try these steps:
+
+1. Run `:PackerClean` to remove unused plugins
+2. Run `:PackerSync` to reinstall and update
+3. Restart Neovim completely
+4. Check the error messages in `:PackerStatus`
+</Warning>
+
+## Next Steps
+
+Explore the plugin categories to learn about specific plugins and their configurations:
+
+- [Navigation Plugins](/plugins/navigation) - File finding and project navigation
+- [Editing Plugins](/plugins/editing) - Enhanced editing capabilities
+- [Visual Plugins](/plugins/visual) - Themes and visual enhancements
+- [AI & Completion](/plugins/ai-completion) - AI-powered code assistance

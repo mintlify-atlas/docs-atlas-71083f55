@@ -1,0 +1,371 @@
+---
+title: "Custom File Type Support"
+description: "Learn how to add support for custom file types and configure file type detection in Neovim"
+---
+
+## Overview
+
+Neovim's `vim.filetype.add()` function allows you to register custom file types based on file extensions or patterns. This is configured in `after/plugin/lsp.lua`.
+
+## Current File Type Configuration
+
+The configuration includes custom file type detection for template languages and Markdown variants:
+
+```lua after/plugin/lsp.lua
+vim.filetype.add({
+    extension = {
+        gotmpl = 'gotmpl',
+        mdx    = 'mdx',
+    },
+    pattern = {
+        [".*/templates/.*%.tpl"] = "helm",
+        [".*/templates/.*%.ya?ml"] = "helm",
+        ["helmfile.*%.ya?ml"] = "helm",
+    },
+})
+```
+
+## File Type Detection Methods
+
+### Extension-Based Detection
+
+Map file extensions directly to file types:
+
+```lua
+vim.filetype.add({
+    extension = {
+        gotmpl = 'gotmpl',  -- .gotmpl files
+        mdx    = 'mdx',     -- .mdx files
+    },
+})
+```
+
+<Note>
+Extension-based detection is the simplest and most efficient method for file type recognition.
+</Note>
+
+### Pattern-Based Detection
+
+Use Lua patterns to match file paths:
+
+```lua
+vim.filetype.add({
+    pattern = {
+        [".*/templates/.*%.tpl"] = "helm",          -- Helm templates
+        [".*/templates/.*%.ya?ml"] = "helm",        -- Helm YAML files
+        ["helmfile.*%.ya?ml"] = "helm",             -- Helmfile configs
+    },
+})
+```
+
+## Current Supported Custom File Types
+
+### Go Templates (gotmpl)
+
+Files with the `.gotmpl` extension are detected as Go template files:
+
+```lua
+extension = {
+    gotmpl = 'gotmpl',
+}
+```
+
+**Common use cases:**
+- Kubernetes manifests with Go templating
+- Hugo templates
+- Go text/template files
+
+### MDX Files
+
+Markdown files with JSX are detected as MDX:
+
+```lua
+extension = {
+    mdx = 'mdx',
+}
+```
+
+**Features enabled:**
+- Markdown syntax highlighting
+- JSX/React component support
+- Proper LSP integration
+
+### Helm Charts
+
+Helm template files are detected based on their location and extension:
+
+```lua
+pattern = {
+    [".*/templates/.*%.tpl"] = "helm",
+    [".*/templates/.*%.ya?ml"] = "helm",
+    ["helmfile.*%.ya?ml"] = "helm",
+}
+```
+
+**Detected files:**
+- Any `.tpl` file in a `templates/` directory
+- Any `.yaml` or `.yml` file in a `templates/` directory
+- Any file starting with `helmfile` and ending in `.yaml` or `.yml`
+
+## Adding New File Types
+
+<Steps>
+  <Step title="Open LSP configuration">
+    Edit `after/plugin/lsp.lua` in your Neovim configuration directory.
+  </Step>
+  
+  <Step title="Add file type detection">
+    Add your file type to the `vim.filetype.add()` configuration:
+    
+    ```lua
+    vim.filetype.add({
+        extension = {
+            gotmpl = 'gotmpl',
+            mdx    = 'mdx',
+            -- Add your custom extension
+            tf     = 'terraform',
+        },
+        pattern = {
+            [".*/templates/.*%.tpl"] = "helm",
+            [".*/templates/.*%.ya?ml"] = "helm",
+            ["helmfile.*%.ya?ml"] = "helm",
+            -- Add your custom pattern
+            [".*%.conf"] = "config",
+        },
+    })
+    ```
+  </Step>
+  
+  <Step title="Configure LSP support (optional)">
+    If the file type has an LSP server, configure it:
+    
+    ```lua
+    lsp.configure("terraformls", {})
+    ```
+  </Step>
+  
+  <Step title="Reload configuration">
+    Restart Neovim to apply the changes.
+  </Step>
+</Steps>
+
+## Common File Type Examples
+
+### Terraform Files
+
+```lua
+vim.filetype.add({
+    extension = {
+        tf = 'terraform',
+        tfvars = 'terraform',
+    },
+})
+```
+
+### Docker Files
+
+```lua
+vim.filetype.add({
+    pattern = {
+        ["Dockerfile.*"] = "dockerfile",
+        [".*%.dockerfile"] = "dockerfile",
+    },
+})
+```
+
+### Configuration Files
+
+```lua
+vim.filetype.add({
+    extension = {
+        conf = 'conf',
+        cfg  = 'cfg',
+    },
+    pattern = {
+        [".*/%.config/.*%.conf"] = "conf",
+    },
+})
+```
+
+### JSON with Comments
+
+```lua
+vim.filetype.add({
+    extension = {
+        jsonc = 'jsonc',
+    },
+    pattern = {
+        [".*tsconfig.*%.json"] = "jsonc",
+    },
+})
+```
+
+## Pattern Matching Examples
+
+<CodeGroup>
+```lua Directory-Based
+pattern = {
+    [".*/api/.*%.yaml"] = "openapi",  -- YAML files in api/ directory
+}
+```
+
+```lua Filename Prefix
+pattern = {
+    ["docker%-compose.*%.ya?ml"] = "yaml.docker-compose",
+}
+```
+
+```lua Multiple Extensions
+pattern = {
+    [".*%.[ch]pp"] = "cpp",  -- .cpp or .hpp files
+    [".*%.ya?ml"] = "yaml",  -- .yaml or .yml files
+}
+```
+
+```lua Complex Patterns
+pattern = {
+    [".*/kubernetes/.*/.*%.yaml"] = "yaml.kubernetes",
+    ["%.github/workflows/.*%.ya?ml"] = "yaml.github",
+}
+```
+</CodeGroup>
+
+<Note>
+Lua patterns use `%` as the escape character. Use `%.` to match a literal dot and `?` to make the previous character optional.
+</Note>
+
+## File Type Detection by Content
+
+For more advanced detection based on file content, use a function:
+
+```lua
+vim.filetype.add({
+    pattern = {
+        ['.*'] = {
+            function(path, bufnr)
+                -- Read first line of file
+                local first_line = vim.api.nvim_buf_get_lines(bufnr, 0, 1, false)[1]
+                
+                -- Detect shebang
+                if first_line and first_line:match('^#!/usr/bin/env python') then
+                    return 'python'
+                end
+                
+                -- Detect XML declaration
+                if first_line and first_line:match('^<%?xml') then
+                    return 'xml'
+                end
+            end,
+        },
+    },
+})
+```
+
+## Filename-Based Detection
+
+Detect file types based on exact filename matches:
+
+```lua
+vim.filetype.add({
+    filename = {
+        ['Dockerfile'] = 'dockerfile',
+        ['docker-compose.yml'] = 'yaml.docker-compose',
+        ['.env'] = 'sh',
+        ['Makefile'] = 'make',
+    },
+})
+```
+
+## Integrating with LSP
+
+After adding file type detection, ensure the corresponding LSP server is configured:
+
+<Steps>
+  <Step title="Add file type detection">
+    ```lua
+    vim.filetype.add({
+        extension = { prisma = 'prisma' },
+    })
+    ```
+  </Step>
+  
+  <Step title="Install LSP server">
+    ```vim
+    :Mason
+    ```
+    Install the `prisma-language-server`.
+  </Step>
+  
+  <Step title="Configure LSP (if needed)">
+    ```lua
+    lsp.configure("prismals", {})
+    ```
+  </Step>
+</Steps>
+
+## Verifying File Type Detection
+
+Check the detected file type for the current buffer:
+
+```vim
+:set filetype?
+```
+
+Or use:
+
+```vim
+:echo &filetype
+```
+
+## Override Default File Type Detection
+
+If you need to override Neovim's default detection:
+
+```lua
+vim.filetype.add({
+    extension = {
+        -- Override .yaml to always be Kubernetes YAML
+        yaml = 'yaml.kubernetes',
+    },
+})
+```
+
+<Warning>
+Overriding default file types can cause unexpected behavior. Use pattern-based detection instead when possible.
+</Warning>
+
+## Troubleshooting
+
+### File Type Not Detected
+
+1. Check your pattern syntax:
+   ```vim
+   :lua print(vim.inspect(vim.filetype.match({ filename = 'test.gotmpl' })))
+   ```
+
+2. Verify the file matches your pattern:
+   ```vim
+   :lua print(vim.fn.matchstr('templates/app.yaml', '.*/templates/.*%.ya?ml'))
+   ```
+
+3. Reload the file:
+   ```vim
+   :edit
+   ```
+
+### LSP Not Attaching
+
+1. Verify file type is set:
+   ```vim
+   :set filetype?
+   ```
+
+2. Check LSP status:
+   ```vim
+   :LspInfo
+   ```
+
+3. Ensure LSP server is installed:
+   ```vim
+   :Mason
+   ```

@@ -1,0 +1,218 @@
+---
+title: Harpoon
+description: Lightning-fast navigation between frequently used files and terminals
+---
+
+## Overview
+
+Harpoon allows you to mark files and quickly jump between them with single keystrokes. Perfect for navigating between files you're actively working on.
+
+<CardGroup cols={2}>
+  <Card title="Mark Files" icon="bookmark">
+    Save files to quick-access slots
+  </Card>
+  <Card title="Instant Navigation" icon="bolt">
+    Jump to marked files with one keystroke
+  </Card>
+  <Card title="Terminal Integration" icon="terminal">
+    Quick access to multiple terminals
+  </Card>
+  <Card title="Menu UI" icon="list">
+    Visual menu to manage marked files
+  </Card>
+</CardGroup>
+
+## Configuration
+
+```lua ~/workspace/source/after/plugin/harpoon.lua
+local term = require("harpoon.term")
+local mark = require("harpoon.mark")
+local ui = require("harpoon.ui")
+```
+
+## File Marking & Navigation
+
+### Mark Current File
+
+```lua
+vim.keymap.set("n", "<leader>m", mark.add_file)
+```
+
+**Keybinding:** `<leader>m`
+
+Marks the current file to one of the 4 available slots. Files are marked in the order you add them.
+
+### Toggle Quick Menu
+
+```lua
+vim.keymap.set("n", "<S-m>", ui.toggle_quick_menu)
+```
+
+**Keybinding:** `<S-m>` (Shift + m)
+
+Opens the Harpoon quick menu where you can:
+- See all marked files
+- Remove marks
+- Reorder files
+- Jump to any marked file
+
+### Navigate to Marked Files
+
+<Tabs>
+  <Tab title="Slot 1">
+    ```lua
+    vim.keymap.set("n", "<leader>ma", function() ui.nav_file(1) end)
+    ```
+    
+    **Keybinding:** `<leader>ma`
+    
+    Jump to the first marked file.
+  </Tab>
+  
+  <Tab title="Slot 2">
+    ```lua
+    vim.keymap.set("n", "<leader>ms", function() ui.nav_file(2) end)
+    ```
+    
+    **Keybinding:** `<leader>ms`
+    
+    Jump to the second marked file.
+  </Tab>
+  
+  <Tab title="Slot 3">
+    ```lua
+    vim.keymap.set("n", "<leader>md", function() ui.nav_file(3) end)
+    ```
+    
+    **Keybinding:** `<leader>md`
+    
+    Jump to the third marked file.
+  </Tab>
+  
+  <Tab title="Slot 4">
+    ```lua
+    vim.keymap.set("n", "<leader>mf", function() ui.nav_file(4) end)
+    ```
+    
+    **Keybinding:** `<leader>mf`
+    
+    Jump to the fourth marked file.
+  </Tab>
+</Tabs>
+
+<Note>
+  The navigation keys follow a pattern: `<leader>m` + a letter on the home row (a, s, d, f) for ergonomic access.
+</Note>
+
+## Terminal Navigation
+
+Harpoon also provides quick access to terminal buffers:
+
+<Tabs>
+  <Tab title="Terminal 1">
+    ```lua
+    vim.keymap.set("n", "<leader>ta", function() term.gotoTerminal(1) end)
+    ```
+    
+    **Keybinding:** `<leader>ta`
+  </Tab>
+  
+  <Tab title="Terminal 2">
+    ```lua
+    vim.keymap.set("n", "<leader>ts", function() term.gotoTerminal(2) end)
+    ```
+    
+    **Keybinding:** `<leader>ts`
+  </Tab>
+  
+  <Tab title="Terminal 3">
+    ```lua
+    vim.keymap.set("n", "<leader>td", function() term.gotoTerminal(3) end)
+    ```
+    
+    **Keybinding:** `<leader>td`
+  </Tab>
+  
+  <Tab title="Terminal 4">
+    ```lua
+    vim.keymap.set("n", "<leader>tf", function() term.gotoTerminal(4) end)
+    ```
+    
+    **Keybinding:** `<leader>tf`
+  </Tab>
+</Tabs>
+
+## Keybindings Reference
+
+### File Management
+
+| Keybinding | Action | Description |
+|------------|--------|-------------|
+| `<leader>m` | Mark file | Add current file to Harpoon |
+| `<S-m>` | Toggle menu | Open Harpoon quick menu |
+
+### File Navigation
+
+| Keybinding | Action | Description |
+|------------|--------|-------------|
+| `<leader>ma` | Navigate to file 1 | Jump to first marked file |
+| `<leader>ms` | Navigate to file 2 | Jump to second marked file |
+| `<leader>md` | Navigate to file 3 | Jump to third marked file |
+| `<leader>mf` | Navigate to file 4 | Jump to fourth marked file |
+
+### Terminal Navigation
+
+| Keybinding | Action | Description |
+|------------|--------|-------------|
+| `<leader>ta` | Terminal 1 | Jump to first terminal |
+| `<leader>ts` | Terminal 2 | Jump to second terminal |
+| `<leader>td` | Terminal 3 | Jump to third terminal |
+| `<leader>tf` | Terminal 4 | Jump to fourth terminal |
+
+## Workflow Example
+
+<Steps>
+  <Step title="Mark your active files">
+    Open a file you're working on and press `<leader>m` to mark it. Repeat for up to 4 files.
+  </Step>
+  
+  <Step title="Quick navigation">
+    Use `<leader>ma`, `<leader>ms`, `<leader>md`, or `<leader>mf` to instantly jump between your marked files.
+  </Step>
+  
+  <Step title="Manage marks">
+    Press `<S-m>` to open the menu and reorder or remove marks as needed.
+  </Step>
+</Steps>
+
+## Tips
+
+<Tip>
+  **Muscle memory**: The home row pattern (a, s, d, f) makes navigation extremely fast once you build muscle memory.
+</Tip>
+
+<Tip>
+  **Per-project marks**: Harpoon marks are stored per-project, so you can have different marked files in different projects.
+</Tip>
+
+<Tip>
+  **Terminal workflow**: Use terminal slots for frequently used commands - one for tests, one for server, one for git operations, etc.
+</Tip>
+
+## Comparison with Other Navigation
+
+<AccordionGroup>
+  <Accordion title="vs Telescope">
+    - **Telescope**: Great for finding files you don't have open
+    - **Harpoon**: Better for cycling through files you're actively editing
+    
+    Use both together: Telescope to discover, Harpoon to navigate your active working set.
+  </Accordion>
+  
+  <Accordion title="vs Buffer switching">
+    - **Buffer list**: Contains all opened files (can be overwhelming)
+    - **Harpoon**: Only your explicitly marked files (focused)
+    
+    Harpoon gives you deterministic navigation - `<leader>ma` always goes to the same file until you change it.
+  </Accordion>
+</AccordionGroup>

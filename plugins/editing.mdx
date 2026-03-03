@@ -1,0 +1,408 @@
+---
+title: "Editing Plugins"
+description: "Comment.nvim, vim-sleuth, and undotree for enhanced editing"
+---
+
+## Overview
+
+Editing plugins enhance your text manipulation capabilities and provide utilities for better code editing. This configuration includes:
+
+<CardGroup cols={3}>
+  <Card title="Comment.nvim" icon="comment">
+    Easy code commenting
+  </Card>
+  <Card title="vim-sleuth" icon="indent">
+    Automatic indentation detection
+  </Card>
+  <Card title="undotree" icon="clock-rotate-left">
+    Visual undo history
+  </Card>
+</CardGroup>
+
+## Comment.nvim
+
+[Comment.nvim](https://github.com/numToStr/Comment.nvim) provides smart and powerful commenting functionality for Neovim. It automatically detects the filetype and uses the appropriate comment syntax.
+
+### Installation
+
+```lua lua/fastfist/packer.lua:51-56
+use {
+    'numToStr/Comment.nvim',
+    config = function()
+        require('Comment').setup()
+    end
+}
+```
+
+<Note>
+Comment.nvim is configured inline in `packer.lua` with the default setup.
+</Note>
+
+### Default Keybindings
+
+Comment.nvim provides intuitive keybindings out of the box:
+
+<Tabs>
+  <Tab title="Normal Mode">
+    <ParamField path="gcc" type="keymap">
+      Toggle comment on the current line
+    </ParamField>
+    
+    <ParamField path="gc{motion}" type="keymap">
+      Toggle comment on a motion (e.g., `gcap` to comment a paragraph)
+    </ParamField>
+    
+    <ParamField path="gbc" type="keymap">
+      Toggle block comment on the current line
+    </ParamField>
+    
+    <ParamField path="gb{motion}" type="keymap">
+      Toggle block comment on a motion
+    </ParamField>
+  </Tab>
+  
+  <Tab title="Visual Mode">
+    <ParamField path="gc" type="keymap">
+      Toggle line comment on the selection
+    </ParamField>
+    
+    <ParamField path="gb" type="keymap">
+      Toggle block comment on the selection
+    </ParamField>
+  </Tab>
+</Tabs>
+
+### Usage Examples
+
+<Steps>
+  <Step title="Comment a single line">
+    Position cursor on the line and press `gcc`
+    
+    ```lua
+    -- Before
+    local x = 10
+    
+    -- After pressing gcc
+    -- local x = 10
+    ```
+  </Step>
+  
+  <Step title="Comment multiple lines">
+    Visual select lines and press `gc`
+    
+    ```lua
+    -- Before (with lines 1-3 selected)
+    local x = 10
+    local y = 20
+    local z = 30
+    
+    -- After pressing gc
+    -- local x = 10
+    -- local y = 20
+    -- local z = 30
+    ```
+  </Step>
+  
+  <Step title="Comment with motion">
+    Use `gc` with Vim motions for precise commenting
+    
+    ```
+    gcap  - Comment a paragraph
+    gc3j  - Comment current line and 3 lines down
+    gc}   - Comment until end of block
+    ```
+  </Step>
+</Steps>
+
+<Tip>
+Comment.nvim automatically handles different comment styles for different file types. It works with Lua (`--`), JavaScript (`//`), Python (`#`), HTML (`<!-- -->`), and many more!
+</Tip>
+
+### Language Support
+
+<AccordionGroup>
+  <Accordion title="Supported Languages">
+    Comment.nvim supports a wide variety of languages through tree-sitter:
+    
+    - **C/C++:** `//` or `/* */`
+    - **Python:** `#`
+    - **JavaScript/TypeScript:** `//` or `/* */`
+    - **Lua:** `--` or `--[[ ]]`
+    - **Rust:** `//` or `/* */`
+    - **Go:** `//` or `/* */`
+    - **HTML/XML:** `<!-- -->`
+    - **CSS:** `/* */`
+    - **Shell:** `#`
+    
+    And many more languages are automatically supported!
+  </Accordion>
+</AccordionGroup>
+
+## vim-sleuth
+
+[vim-sleuth](https://github.com/tpope/vim-sleuth) automatically detects indentation settings (tabs vs spaces, indent width) by analyzing the current file and similar files in the project.
+
+### Installation
+
+```lua lua/fastfist/packer.lua:50
+use 'tpope/vim-sleuth' -- Detect tabstop and shiftwidth automatically
+```
+
+### How It Works
+
+<Card title="Automatic Indentation Detection" icon="wand-magic-sparkles">
+  vim-sleuth works automatically in the background with **no configuration required**. When you open a file:
+  
+  <Steps>
+    <Step title="Analyzes the file">
+      Examines the current file's indentation patterns
+    </Step>
+    
+    <Step title="Checks related files">
+      Looks at other files in the same directory
+    </Step>
+    
+    <Step title="Sets options automatically">
+      Configures `tabstop`, `shiftwidth`, and `expandtab` accordingly
+    </Step>
+  </Steps>
+</Card>
+
+### What It Detects
+
+<AccordionGroup>
+  <Accordion title="Tab Width">
+    Automatically sets `tabstop` and `shiftwidth` based on the file's indentation:
+    
+    - 2 spaces
+    - 4 spaces
+    - 8 spaces
+    - Or actual tab characters
+  </Accordion>
+  
+  <Accordion title="Tabs vs Spaces">
+    Determines whether the file uses:
+    
+    - Spaces for indentation (`expandtab` on)
+    - Tab characters for indentation (`expandtab` off)
+  </Accordion>
+</AccordionGroup>
+
+### Benefits
+
+<CardGroup cols={2}>
+  <Card title="Consistency" icon="check">
+    Automatically matches the existing code style in any project
+  </Card>
+  
+  <Card title="No Configuration" icon="sparkles">
+    Works out of the box without any setup
+  </Card>
+  
+  <Card title="Per-File Settings" icon="file">
+    Adjusts settings for each file individually
+  </Card>
+  
+  <Card title="Team Friendly" icon="users">
+    Respects project conventions automatically
+  </Card>
+</CardGroup>
+
+<Info>
+vim-sleuth is completely transparent and requires no user interaction. It just makes Neovim smarter about indentation!
+</Info>
+
+## undotree
+
+[undotree](https://github.com/mbbill/undotree) visualizes Neovim's undo history as a tree, making it easy to navigate through different versions of your file.
+
+### Installation
+
+```lua lua/fastfist/packer.lua:19
+use 'mbbill/undotree'
+```
+
+### Configuration
+
+Undotree has a simple toggle keybinding configured in `after/plugin/undotree.lua:1`:
+
+```lua after/plugin/undotree.lua
+vim.keymap.set("n", "<leader>u", vim.cmd.UndotreeToggle)
+```
+
+### Keybindings
+
+<ParamField path="<leader>u" type="keymap">
+  Toggle the undotree panel
+</ParamField>
+
+### Understanding the Undo Tree
+
+<Tabs>
+  <Tab title="Linear Undo">
+    Traditional undo in most editors:
+    
+    ```
+    A → B → C → D
+        ↑
+        (undo back to B, changes C and D are lost)
+    ```
+    
+    <Warning>
+    In traditional editors, if you undo and then make changes, you lose the "future" edits.
+    </Warning>
+  </Tab>
+  
+  <Tab title="Tree Undo">
+    Vim's undo system preserves all changes:
+    
+    ```
+    A → B → C → D
+            ↓
+            E → F
+    ```
+    
+    <Info>
+    With undotree, you can navigate to **any previous state** - nothing is ever lost!
+    </Info>
+  </Tab>
+</Tabs>
+
+### Using undotree
+
+<Steps>
+  <Step title="Open undotree">
+    Press `<leader>u` to open the undotree panel
+  </Step>
+  
+  <Step title="Navigate the tree">
+    Use these keys in the undotree window:
+    
+    - `j/k` - Move up/down through history
+    - `Enter` - Jump to selected state
+    - `u` - Undo
+    - `Ctrl+r` - Redo
+  </Step>
+  
+  <Step title="Preview changes">
+    The diff window shows changes between the current state and the selected state
+  </Step>
+  
+  <Step title="Return to editing">
+    Press `<leader>u` again to close undotree, or just switch windows
+  </Step>
+</Steps>
+
+### undotree Interface
+
+When you open undotree, you'll see three panels:
+
+<CodeGroup>
+
+```text Undotree Layout
+┌─────────────────┬──────────────────────┐
+│                 │                      │
+│  Undo Tree      │   Current File       │
+│  (left panel)   │   (main editor)      │
+│                 │                      │
+├─────────────────┤                      │
+│                 │                      │
+│  Diff Preview   │                      │
+│  (bottom left)  │                      │
+│                 │                      │
+└─────────────────┴──────────────────────┘
+```
+
+</CodeGroup>
+
+<ResponseField name="Undo Tree Panel" type="description">
+  Shows the visual tree of all changes with timestamps. Each node represents a state of the file.
+</ResponseField>
+
+<ResponseField name="Diff Preview Panel" type="description">
+  Displays the differences between the currently selected state and the current file state.
+</ResponseField>
+
+<ResponseField name="Main Editor" type="description">
+  Shows your file as it would appear in the selected undo state.
+</ResponseField>
+
+### When to Use undotree
+
+<AccordionGroup>
+  <Accordion title="Recovering Lost Changes">
+    If you accidentally undo too much and then make new changes, undotree lets you recover the "lost" edits:
+    
+    1. Open undotree with `<leader>u`
+    2. Navigate to the branch with your lost changes
+    3. Press Enter to restore that state
+  </Accordion>
+  
+  <Accordion title="Exploring Different Approaches">
+    When trying different solutions to a problem:
+    
+    1. Make an attempt at a solution
+    2. If it doesn't work, undo and try a different approach
+    3. Use undotree to compare or return to previous attempts
+  </Accordion>
+  
+  <Accordion title="Finding When a Change Was Made">
+    If you want to see when a specific change was introduced:
+    
+    1. Open undotree
+    2. Navigate through the history
+    3. Use the diff panel to see what changed at each point
+  </Accordion>
+</AccordionGroup>
+
+<Tip>
+Vim's undo system persists across sessions if you have undo files enabled. This means you can access undo history from days or weeks ago!
+</Tip>
+
+## Editing Workflow
+
+These plugins work together to create a powerful editing environment:
+
+<Steps>
+  <Step title="Open a file">
+    vim-sleuth automatically detects and sets the indentation style
+  </Step>
+  
+  <Step title="Edit and comment">
+    Use Comment.nvim (`gcc`, `gc`) to toggle comments as you work
+  </Step>
+  
+  <Step title="Experiment freely">
+    Make changes knowing you can recover any state with undotree
+  </Step>
+  
+  <Step title="Review history">
+    Use `<leader>u` to explore your edit history and recover changes
+  </Step>
+</Steps>
+
+## Summary
+
+<CardGroup cols={3}>
+  <Card title="Comment.nvim" icon="comment">
+    **Key binding:** `gcc` / `gc`
+    
+    Smart commenting for any language
+  </Card>
+  
+  <Card title="vim-sleuth" icon="indent">
+    **No configuration needed**
+    
+    Automatic indentation detection
+  </Card>
+  
+  <Card title="undotree" icon="clock-rotate-left">
+    **Key binding:** `<leader>u`
+    
+    Visual undo history tree
+  </Card>
+</CardGroup>
+
+<Info>
+These editing plugins require minimal configuration and provide maximum productivity gains!
+</Info>

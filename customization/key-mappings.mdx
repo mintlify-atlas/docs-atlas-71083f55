@@ -1,0 +1,293 @@
+---
+title: "Custom Key Mappings"
+description: "Learn how to customize keybindings and add custom key mappings to your Neovim configuration"
+---
+
+## Overview
+
+Key mappings are configured in `lua/fastfist/remap.lua`. The configuration uses `vim.keymap.set()` for setting keybindings across different modes.
+
+## Leader Key
+
+The leader key is set to Space:
+
+```lua lua/fastfist/remap.lua
+vim.g.mapleader = " "
+```
+
+<Note>
+The leader key must be set before any mappings that use it. Always configure it at the top of your remap file.
+</Note>
+
+## Basic Key Mapping Syntax
+
+The general syntax for creating keybindings is:
+
+```lua
+vim.keymap.set(mode, key, action, options)
+```
+
+- **mode**: The mode(s) where the mapping applies (`"n"`, `"v"`, `"i"`, `"t"`, etc.)
+- **key**: The key combination to map
+- **action**: The action to perform (string command or Lua function)
+- **options**: Optional table of settings like `{ remap = false, silent = true }`
+
+## Current Key Mappings
+
+### Visual Mode Mappings
+
+Move selected lines up and down while maintaining indentation:
+
+```lua lua/fastfist/remap.lua
+vim.keymap.set("v", "J", ":m '>+1<CR>gv=gv")
+vim.keymap.set("v", "K", ":m '<-2<CR>gv=gv")
+```
+
+### Navigation Mappings
+
+Center the screen after jumping:
+
+```lua lua/fastfist/remap.lua
+vim.keymap.set("n", "<C-d>", "<C-d>zz")
+vim.keymap.set("n", "<C-u>", "<C-u>zz")
+vim.keymap.set("n", "n", "nzzzv")
+vim.keymap.set("n", "N", "Nzzzv")
+```
+
+### Window Navigation
+
+Quickly move between splits using Ctrl + hjkl:
+
+```lua lua/fastfist/remap.lua
+vim.keymap.set("n", "<C-l>", "<C-W>l")
+vim.keymap.set("n", "<C-h>", "<C-W>h")
+vim.keymap.set("n", "<C-j>", "<C-W>j")
+vim.keymap.set("n", "<C-k>", "<C-W>k")
+```
+
+### Terminal Mode Mapping
+
+Escape from terminal mode:
+
+```lua lua/fastfist/remap.lua
+vim.keymap.set("t", "<Esc>", "<C-\\><C-n>")
+```
+
+### Quickfix Navigation
+
+Navigate through quickfix list:
+
+```lua lua/fastfist/remap.lua
+vim.keymap.set("n", "<S-l>", ":cnext<CR>")
+vim.keymap.set("n", "<S-h>", ":cprev<CR>")
+```
+
+### Utility Mappings
+
+Common utility keybindings:
+
+```lua lua/fastfist/remap.lua
+vim.keymap.set("n", "<leader>b", ":!yarn build<CR>")
+vim.keymap.set("n", "<leader>s", ":PackerSync<CR>")
+vim.keymap.set("n", "<leader>y", '"+')  -- System clipboard
+vim.keymap.set("x", "<leader>y", '"+y') -- Yank to system clipboard
+```
+
+## Adding Custom Keybindings
+
+<Steps>
+  <Step title="Open remap configuration">
+    Edit `lua/fastfist/remap.lua` in your Neovim configuration directory.
+  </Step>
+  
+  <Step title="Add your keybinding">
+    Use `vim.keymap.set()` to create your mapping:
+    
+    ```lua
+    vim.keymap.set("n", "<leader>w", ":w<CR>")
+    ```
+  </Step>
+  
+  <Step title="Reload configuration">
+    Source the file or restart Neovim:
+    
+    ```vim
+    :source %
+    ```
+  </Step>
+</Steps>
+
+## Common Keybinding Examples
+
+### Save and Quit
+
+```lua
+-- Quick save
+vim.keymap.set("n", "<leader>w", ":w<CR>")
+
+-- Save and quit
+vim.keymap.set("n", "<leader>q", ":wq<CR>")
+
+-- Quit without saving
+vim.keymap.set("n", "<leader>Q", ":q!<CR>")
+```
+
+### Buffer Management
+
+```lua
+-- Next/previous buffer
+vim.keymap.set("n", "<leader>bn", ":bnext<CR>")
+vim.keymap.set("n", "<leader>bp", ":bprevious<CR>")
+
+-- Close current buffer
+vim.keymap.set("n", "<leader>bd", ":bdelete<CR>")
+```
+
+### Split Management
+
+```lua
+-- Create splits
+vim.keymap.set("n", "<leader>sv", ":vsplit<CR>")
+vim.keymap.set("n", "<leader>sh", ":split<CR>")
+
+-- Resize splits
+vim.keymap.set("n", "<C-Up>", ":resize +2<CR>")
+vim.keymap.set("n", "<C-Down>", ":resize -2<CR>")
+vim.keymap.set("n", "<C-Left>", ":vertical resize -2<CR>")
+vim.keymap.set("n", "<C-Right>", ":vertical resize +2<CR>")
+```
+
+### Search and Replace
+
+```lua
+-- Search and replace word under cursor
+vim.keymap.set("n", "<leader>r", ":%s/\\<<C-r><C-w>\\>/<C-r><C-w>/gI<Left><Left><Left>")
+
+-- Clear search highlighting
+vim.keymap.set("n", "<leader>h", ":nohlsearch<CR>")
+```
+
+## Mapping with Lua Functions
+
+You can map keys to Lua functions for more complex behavior:
+
+```lua
+-- Define a custom function
+local function toggle_line_numbers()
+    vim.opt.relativenumber = not vim.opt.relativenumber:get()
+end
+
+-- Map it to a key
+vim.keymap.set("n", "<leader>tn", toggle_line_numbers)
+```
+
+## Mode-Specific Mappings
+
+<CodeGroup>
+```lua Normal Mode
+vim.keymap.set("n", "<leader>e", ":Neotree toggle<CR>")
+```
+
+```lua Insert Mode
+vim.keymap.set("i", "jk", "<Esc>")  -- Quick escape
+```
+
+```lua Visual Mode
+vim.keymap.set("v", "<leader>p", '"_dP')  -- Paste without yanking
+```
+
+```lua Terminal Mode
+vim.keymap.set("t", "<C-h>", "<C-\\><C-n><C-w>h")
+```
+
+```lua Multiple Modes
+vim.keymap.set({"n", "v"}, "<leader>d", '"_d')  -- Delete to void register
+```
+</CodeGroup>
+
+## Keybinding Options
+
+Common options you can pass to `vim.keymap.set()`:
+
+```lua
+vim.keymap.set("n", "<leader>x", ":!chmod +x %<CR>", {
+    silent = true,    -- Don't show command in command line
+    noremap = true,   -- Non-recursive mapping (same as remap = false)
+    buffer = bufnr,   -- Buffer-local mapping
+    desc = "Make file executable"  -- Description (shown in which-key)
+})
+```
+
+<Note>
+By default, `vim.keymap.set()` creates non-recursive mappings (noremap). Use `remap = true` if you want recursive behavior.
+</Note>
+
+## LSP Keybindings
+
+LSP-specific keybindings are configured in the LSP on-attach function in `after/plugin/lsp.lua`:
+
+```lua after/plugin/lsp.lua
+lsp.on_attach(function(client, bufnr)
+    local opts = { buffer = bufnr, remap = false }
+
+    vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts)
+    vim.keymap.set("n", "K", vim.lsp.buf.hover, opts)
+    vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, opts)
+    -- ... more LSP mappings
+end)
+```
+
+<Warning>
+LSP keybindings are buffer-local and only available when an LSP server is attached to the buffer.
+</Warning>
+
+## Modifying Existing Keybindings
+
+To change an existing keybinding:
+
+<Steps>
+  <Step title="Find the current mapping">
+    Locate the keybinding in `lua/fastfist/remap.lua` or `after/plugin/lsp.lua`.
+  </Step>
+  
+  <Step title="Update the mapping">
+    Change the key combination or action:
+    
+    ```lua
+    -- Old mapping
+    vim.keymap.set("n", "<leader>b", ":!yarn build<CR>")
+    
+    -- New mapping
+    vim.keymap.set("n", "<leader>bb", ":!yarn build<CR>")
+    ```
+  </Step>
+  
+  <Step title="Remove conflicts (if any)">
+    Make sure the new key combination doesn't conflict with existing mappings.
+  </Step>
+</Steps>
+
+## Viewing Current Mappings
+
+To see all current keybindings:
+
+```vim
+:map      " All mappings
+:nmap     " Normal mode mappings
+:vmap     " Visual mode mappings
+:imap     " Insert mode mappings
+```
+
+To check a specific mapping:
+
+```vim
+:nmap <leader>s
+```
+
+## Best Practices
+
+1. **Use leader key**: Prefix custom mappings with `<leader>` to avoid conflicts
+2. **Be consistent**: Group related mappings with similar prefixes (e.g., `<leader>b` for buffer operations)
+3. **Add descriptions**: Use the `desc` option for better documentation
+4. **Test for conflicts**: Check if a key is already mapped before using it
+5. **Keep it organized**: Group related mappings together in your configuration

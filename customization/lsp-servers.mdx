@@ -1,0 +1,286 @@
+---
+title: "LSP Server Configuration"
+description: "Learn how to add and configure Language Server Protocol servers in Neovim"
+---
+
+## Overview
+
+The LSP configuration uses `lsp-zero` for simplified setup and `mason` for automatic LSP server installation. All LSP configuration is located in `after/plugin/lsp.lua`.
+
+## Mason Setup
+
+Mason provides automatic installation and management of LSP servers:
+
+```lua after/plugin/lsp.lua
+require "mason".setup()
+require("mason-lspconfig").setup()
+```
+
+<Note>
+Mason will automatically prompt you to install LSP servers when you open supported file types.
+</Note>
+
+## Basic LSP Configuration
+
+The configuration uses `lsp-zero` with a minimal preset:
+
+```lua after/plugin/lsp.lua
+local lsp = require "lsp-zero".preset({
+    name = "minimal",
+    set_lsp_keymaps = true,
+    manage_nvim_cmp = true,
+    suggest_lsp_servers = true,
+})
+
+lsp.set_preferences({
+    suggest_lsp_servers = true,
+})
+
+lsp.setup()
+```
+
+## Adding New LSP Servers
+
+To add a new LSP server to your configuration:
+
+<Steps>
+  <Step title="Install the LSP server">
+    Use Mason to install the server:
+    
+    ```vim
+    :Mason
+    ```
+    
+    Search for your desired language server and press `i` to install.
+  </Step>
+  
+  <Step title="Configure the server (optional)">
+    Use `lsp.configure()` to add custom settings for the server:
+    
+    ```lua
+    lsp.configure("your_lsp_name", {
+        settings = {
+            -- Server-specific settings here
+        }
+    })
+    ```
+  </Step>
+  
+  <Step title="Reload your configuration">
+    Restart Neovim or source the LSP configuration to apply changes.
+  </Step>
+</Steps>
+
+## Language-Specific Configurations
+
+### Rust Analyzer
+
+The configuration includes custom settings for Rust development with Clippy integration:
+
+```lua after/plugin/lsp.lua
+lsp.configure("rust_analyzer", {
+    settings = {
+        ["rust-analyzer"] = {
+            check = {
+                command = "clippy",
+            },
+        },
+    }
+})
+```
+
+<Note>
+This configuration uses Clippy for code checking instead of the default cargo check, providing more comprehensive linting.
+</Note>
+
+### YAML Language Server
+
+The YAML LSP is configured with Kubernetes schema support using `yaml-companion`:
+
+```lua after/plugin/lsp.lua
+local M = {
+  k8s_schemas = {
+    {
+      name = 'Kubernetes 1.27.12',
+      uri = 'https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/v1.27.12-standalone-strict/all.json',
+    },
+    {
+      name = 'Kubernetes 1.26.14',
+      uri = 'https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/v1.26.14-standalone-strict/all.json',
+    },
+  },
+  all_schemas = {},
+}
+
+local yaml_cfg = require('yaml-companion').setup {
+    builtin_matchers = {
+        kubernetes = { enabled = true },
+    },
+    schemas = M.all_schemas,
+}
+
+lsp.configure("yamlls", {
+    yaml_cfg
+})
+```
+
+## LSP Keybindings
+
+The configuration sets up keybindings automatically when an LSP server attaches to a buffer:
+
+```lua after/plugin/lsp.lua
+lsp.on_attach(function(client, bufnr)
+    local opts = { buffer = bufnr, remap = false }
+
+    vim.keymap.set("n", "<leader>f", conform.format)
+    vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts)
+    vim.keymap.set("n", "K", vim.lsp.buf.hover, opts)
+    vim.keymap.set("n", "<leader>vws", vim.lsp.buf.workspace_symbol, opts)
+    vim.keymap.set("n", "<leader>vd", vim.diagnostic.open_float, opts)
+    vim.keymap.set("n", "]d", vim.diagnostic.goto_next, opts)
+    vim.keymap.set("n", "[d", vim.diagnostic.goto_prev, opts)
+    vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, opts)
+    vim.keymap.set("x", "<leader>a", vim.lsp.buf.code_action, opts)
+    vim.keymap.set("n", "gr", vim.lsp.buf.references, opts)
+    vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename, opts)
+    vim.keymap.set("n", "<F2>", vim.lsp.buf.rename, opts)
+end)
+```
+
+### Default LSP Keybindings
+
+| Key | Mode | Action |
+|-----|------|--------|
+| `gd` | Normal | Go to definition |
+| `K` | Normal | Show hover documentation |
+| `gr` | Normal | Show references |
+| `<leader>rn` | Normal | Rename symbol |
+| `<F2>` | Normal | Rename symbol |
+| `<leader>ca` | Normal | Code actions |
+| `<leader>a` | Visual | Code actions |
+| `<leader>vd` | Normal | Open diagnostics float |
+| `[d` | Normal | Previous diagnostic |
+| `]d` | Normal | Next diagnostic |
+| `<leader>vws` | Normal | Workspace symbol search |
+| `<leader>f` | Normal | Format buffer |
+
+## Advanced Server Configuration
+
+### Custom On-Attach for Specific Servers
+
+You can create custom on-attach functions for specific servers. Here's an example for Rust:
+
+```lua after/plugin/lsp.lua
+local rt = require("rust-tools")
+
+local rust_lsp = lsp.build_options('rust_analyzer', {
+    single_file_support = false,
+    on_attach = function(client, bufnr)
+        local opts = { buffer = bufnr, remap = false }
+        vim.keymap.set("n", "K", rt.hover_actions.hover_actions, opts)
+        vim.keymap.set("n", "<leader>t", rt.open_cargo_toml.open_cargo_toml, opts)
+    end
+})
+```
+
+<Warning>
+Custom on-attach functions for specific servers will override the global on_attach settings for that server.
+</Warning>
+
+## Diagnostic Configuration
+
+Virtual text diagnostics are enabled by default:
+
+```lua after/plugin/lsp.lua
+vim.diagnostic.config({
+    virtual_text = true,
+})
+```
+
+### Customizing Diagnostics
+
+You can customize how diagnostics are displayed:
+
+<CodeGroup>
+```lua Disable Virtual Text
+vim.diagnostic.config({
+    virtual_text = false,
+})
+```
+
+```lua Custom Signs
+vim.diagnostic.config({
+    virtual_text = true,
+    signs = true,
+    underline = true,
+    update_in_insert = false,
+    severity_sort = true,
+})
+```
+
+```lua Custom Severity Levels
+vim.diagnostic.config({
+    virtual_text = {
+        severity = { min = vim.diagnostic.severity.WARN },
+    },
+})
+```
+</CodeGroup>
+
+## Example: Adding TypeScript Support
+
+Here's a complete example of adding TypeScript LSP support:
+
+<Steps>
+  <Step title="Install tsserver">
+    ```vim
+    :Mason
+    ```
+    Search for `typescript-language-server` and install it.
+  </Step>
+  
+  <Step title="Add configuration (optional)">
+    ```lua after/plugin/lsp.lua
+    lsp.configure("tsserver", {
+        settings = {
+            typescript = {
+                inlayHints = {
+                    includeInlayParameterNameHints = "all",
+                    includeInlayFunctionParameterTypeHints = true,
+                },
+            },
+        },
+    })
+    ```
+  </Step>
+  
+  <Step title="Restart Neovim">
+    Open a TypeScript file and the LSP will automatically attach.
+  </Step>
+</Steps>
+
+## Troubleshooting
+
+### Check LSP Status
+
+View active LSP clients for the current buffer:
+
+```vim
+:LspInfo
+```
+
+### View LSP Logs
+
+Check LSP logs for debugging:
+
+```vim
+:lua vim.cmd('e ' .. vim.lsp.get_log_path())
+```
+
+### Restart LSP Server
+
+Restart the LSP server for the current buffer:
+
+```vim
+:LspRestart
+```

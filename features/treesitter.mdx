@@ -1,0 +1,397 @@
+---
+title: Treesitter
+description: Advanced syntax highlighting and code understanding with Tree-sitter
+---
+
+## Overview
+
+Tree-sitter provides superior syntax highlighting and code understanding by building an actual syntax tree of your code, rather than using regex-based highlighting.
+
+<CardGroup cols={2}>
+  <Card title="Smart Highlighting" icon="palette">
+    Context-aware syntax highlighting
+  </Card>
+  <Card title="Incremental Selection" icon="hand-pointer">
+    Expand selections based on syntax structure
+  </Card>
+  <Card title="Auto Install" icon="download">
+    Automatically install language parsers
+  </Card>
+  <Card title="Code Context" icon="bars">
+    Show current function/class at the top
+  </Card>
+</CardGroup>
+
+## Configuration
+
+```lua ~/workspace/source/after/plugin/treesitter.lua
+require 'nvim-treesitter.configs'.setup {
+    ensure_installed = { "c", "lua", "rust", "typescript", "javascript", "solidity", "nu" },
+    sync_install = false,
+    auto_install = true,
+    
+    highlight = {
+        enable = true,
+        additional_vim_regex_highlighting = false,
+    },
+    
+    indent = {
+        enable = true
+    },
+    
+    incremental_selection = {
+        enable = true,
+        keymaps = {
+            node_incremental = '<c-k>',
+            scope_incremental = '<c-s>',
+            node_decremental = '<c-j>',
+        }
+    },
+}
+```
+
+## Supported Languages
+
+Pre-configured parsers:
+
+<CardGroup cols={3}>
+  <Card title="C" icon="c">
+    System programming
+  </Card>
+  <Card title="Lua" icon="moon">
+    Neovim configuration
+  </Card>
+  <Card title="Rust" icon="rust">
+    Systems language
+  </Card>
+  <Card title="TypeScript" icon="js">
+    Typed JavaScript
+  </Card>
+  <Card title="JavaScript" icon="js">
+    Web development
+  </Card>
+  <Card title="Solidity" icon="ethereum">
+    Smart contracts
+  </Card>
+  <Card title="Nushell" icon="terminal">
+    Modern shell
+  </Card>
+</CardGroup>
+
+<Note>
+  With `auto_install = true`, parsers for other languages are automatically installed when you open files.
+</Note>
+
+## Incremental Selection
+
+Select code based on syntax structure, not just lines or words.
+
+### Keybindings
+
+<Tabs>
+  <Tab title="Expand Selection">
+    ```lua
+    node_incremental = '<c-k>'
+    ```
+    
+    **Keybinding:** `<C-k>`
+    
+    Expand selection to the next syntax node:
+    1. Variable name
+    2. Variable declaration
+    3. Statement
+    4. Block
+    5. Function
+    6. And so on...
+  </Tab>
+  
+  <Tab title="Expand Scope">
+    ```lua
+    scope_incremental = '<c-s>'
+    ```
+    
+    **Keybinding:** `<C-s>`
+    
+    Jump to the next scope level (function, class, module).
+  </Tab>
+  
+  <Tab title="Shrink Selection">
+    ```lua
+    node_decremental = '<c-j>'
+    ```
+    
+    **Keybinding:** `<C-j>`
+    
+    Shrink selection to the previous syntax node.
+  </Tab>
+</Tabs>
+
+### Example
+
+Starting with cursor on `foo`:
+
+```rust
+fn example() {
+    let foo = calculate_value();
+    println!("{}", foo);
+}
+```
+
+<Steps>
+  <Step title="First <C-k>">
+    Selects `foo` (identifier)
+  </Step>
+  
+  <Step title="Second <C-k>">
+    Selects `foo = calculate_value()` (assignment)
+  </Step>
+  
+  <Step title="Third <C-k>">
+    Selects `let foo = calculate_value();` (statement)
+  </Step>
+  
+  <Step title="Fourth <C-k>">
+    Selects the entire block inside the function
+  </Step>
+  
+  <Step title="Fifth <C-k>">
+    Selects the entire function
+  </Step>
+</Steps>
+
+<Tip>
+  This is much faster than manually selecting with `viw`, `vi(`, `vi{`, etc. Let the syntax tree guide your selection.
+</Tip>
+
+## Syntax Highlighting
+
+### Features
+
+```lua ~/workspace/source/after/plugin/treesitter.lua
+highlight = {
+    enable = true,
+    additional_vim_regex_highlighting = false,
+}
+```
+
+<AccordionGroup>
+  <Accordion title="Context-Aware Colors">
+    Tree-sitter distinguishes between:
+    
+    - Function calls vs function definitions
+    - Variables vs parameters vs properties
+    - Types vs values
+    - Keywords in different contexts
+    
+    This provides much more meaningful highlighting than traditional regex-based approaches.
+  </Accordion>
+  
+  <Accordion title="No Regex Fallback">
+    `additional_vim_regex_highlighting = false` disables legacy regex highlighting for better performance and consistency.
+  </Accordion>
+  
+  <Accordion title="Incremental Parsing">
+    Tree-sitter only re-parses the changed portion of your file, keeping highlighting fast even in large files.
+  </Accordion>
+</AccordionGroup>
+
+## Smart Indentation
+
+```lua ~/workspace/source/after/plugin/treesitter.lua
+indent = {
+    enable = true
+}
+```
+
+Tree-sitter-based indentation understands your code structure:
+
+- Proper indentation for complex language features
+- Works with language-specific indentation rules
+- Handles edge cases better than regex-based indentation
+
+## Treesitter Context
+
+Shows the current context (function, class, etc.) at the top of the window:
+
+```lua ~/workspace/source/after/plugin/treesitter.lua
+require 'treesitter-context'.setup {
+    enable = true,
+    max_lines = 4,
+}
+```
+
+### Features
+
+<CardGroup cols={2}>
+  <Card title="Sticky Context" icon="thumbtack">
+    Current function/class stays visible when scrolling
+  </Card>
+  <Card title="Up to 4 Lines" icon="layer-group">
+    Shows nested context up to 4 levels deep
+  </Card>
+</CardGroup>
+
+### Example
+
+When scrolling through a long function:
+
+```typescript
+class UserService {
+  async function processUsers() {  // <- This stays at the top
+    for (const user of users) {
+      // You're reading code here
+      // Even 100 lines down
+      // You can still see the function name
+    }
+  }
+}
+```
+
+<Note>
+  The context window is highlighted differently to distinguish it from regular code.
+</Note>
+
+## Installation Modes
+
+<Tabs>
+  <Tab title="Automatic">
+    ```lua
+    auto_install = true
+    ```
+    
+    Parsers are installed automatically when you open files:
+    
+    - Open a Python file → Python parser installs
+    - Open a Go file → Go parser installs
+    - No manual intervention needed
+  </Tab>
+  
+  <Tab title="Pre-installed">
+    ```lua
+    ensure_installed = { "c", "lua", "rust", ... }
+    ```
+    
+    These parsers are installed immediately when you start Neovim.
+  </Tab>
+  
+  <Tab title="Synchronous">
+    ```lua
+    sync_install = false
+    ```
+    
+    Parsers install in the background, so Neovim doesn't freeze during installation.
+  </Tab>
+</Tabs>
+
+## Manual Parser Management
+
+You can also manually manage parsers:
+
+```vim
+" Install a parser
+:TSInstall python
+
+" Update all parsers
+:TSUpdate
+
+" Uninstall a parser
+:TSUninstall python
+
+" Check installed parsers
+:TSInstallInfo
+```
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Highlighting not working">
+    Check if the parser is installed:
+    
+    ```vim
+    :TSInstallInfo
+    ```
+    
+    If the language is marked with ✗, install it:
+    
+    ```vim
+    :TSInstall <language>
+    ```
+  </Accordion>
+  
+  <Accordion title="Parser compilation fails">
+    Ensure you have a C compiler installed:
+    
+    ```bash
+    # macOS
+    xcode-select --install
+    
+    # Ubuntu/Debian
+    apt install build-essential
+    
+    # Arch
+    pacman -S base-devel
+    ```
+  </Accordion>
+  
+  <Accordion title="Slow performance">
+    Try disabling context for very large files:
+    
+    ```vim
+    :TSContextDisable
+    ```
+    
+    Re-enable with:
+    
+    ```vim
+    :TSContextEnable
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Advanced Features
+
+### Query Playground
+
+Explore the syntax tree:
+
+```vim
+:TSPlaygroundToggle
+```
+
+This opens a window showing:
+- The syntax tree of your code
+- Node types and ranges
+- How highlighting is applied
+
+Useful for understanding Tree-sitter and debugging highlighting issues.
+
+## Performance
+
+<CardGroup cols={2}>
+  <Card title="Fast Parsing" icon="gauge-high">
+    Tree-sitter is written in C and is extremely fast
+  </Card>
+  <Card title="Incremental" icon="arrows-rotate">
+    Only re-parses changed sections of code
+  </Card>
+  <Card title="Low Memory" icon="memory">
+    Efficient tree representation
+  </Card>
+  <Card title="No Lag" icon="forward-fast">
+    Works smoothly even in large files
+  </Card>
+</CardGroup>
+
+## Tips
+
+<Tip>
+  **Learn the tree structure**: Use `<C-k>` to explore how Tree-sitter sees your code. This will help you make better selections.
+</Tip>
+
+<Tip>
+  **Combine with text objects**: Tree-sitter's incremental selection works great with visual mode and operators like `d`, `c`, `y`.
+</Tip>
+
+<Tip>
+  **Context awareness**: Pay attention to the context window at the top - it helps you stay oriented in large files.
+</Tip>

@@ -1,0 +1,361 @@
+---
+title: Nushell Integration
+description: Execute Nushell and Zsh commands directly from Neovim with frontmatter support
+---
+
+## Overview
+
+This custom integration allows you to execute Nushell or Zsh commands directly from your buffer and see the output in a floating window. Perfect for literate programming, data exploration, and documentation.
+
+<CardGroup cols={2}>
+  <Card title="Nushell Execution" icon="terminal">
+    Run Nushell scripts with frontmatter context
+  </Card>
+  <Card title="Zsh Support" icon="code">
+    Execute Zsh commands for shell scripting
+  </Card>
+  <Card title="Floating Output" icon="window-maximize">
+    Results appear in a clean floating window
+  </Card>
+  <Card title="Command History" icon="clock-rotate-left">
+    Rerun the last command with one keystroke
+  </Card>
+</CardGroup>
+
+## Setup
+
+```lua
+require('fastfist.nushell').setup()
+```
+
+This creates the `NuRun` command and sets up all keybindings.
+
+## Keybindings
+
+| Keybinding | Action | Description |
+|------------|--------|-------------|
+| `<C-n>` | Run with Nushell | Execute current command block in Nushell |
+| `<C-s>` | Run with Zsh | Execute current command block in Zsh |
+| `<C-f>` | Rerun last | Rerun the last executed command |
+
+<Note>
+  Commands are executed from the current cursor position. The plugin automatically detects the command block around your cursor.
+</Note>
+
+## Nushell Execution
+
+### Basic Usage
+
+<Steps>
+  <Step title="Write a command">
+    Type a Nushell command in your buffer:
+    
+    ```nu
+    ls | where size > 1mb | sort-by size
+    ```
+  </Step>
+  
+  <Step title="Execute">
+    Press `<C-n>` with your cursor on or near the command
+  </Step>
+  
+  <Step title="View results">
+    Output appears in a floating window. Press `q` or `<Esc>` to close.
+  </Step>
+</Steps>
+
+### Frontmatter Support
+
+The killer feature: define variables and functions at the top of your file that are available to all commands.
+
+<CodeGroup>
+```nu Example File
+# Define variables and setup
+let data_dir = "~/datasets"
+let api_key = $env.API_KEY
+
+# Custom helper function
+def process-data [] {
+  open data.json | get items | where active == true
+}
+
+###
+
+# Now use the variables in any command
+ls $data_dir | get name
+
+# Or call your helper
+process-data | length
+```
+</CodeGroup>
+
+<Warning>
+  The frontmatter section must be terminated with a line containing only `###` (three hash symbols).
+</Warning>
+
+### How Frontmatter Works
+
+```lua ~/workspace/source/lua/fastfist/nushell.lua
+local function get_frontmatter()
+    local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
+    local frontmatter = {}
+    
+    -- Add built-in utilities
+    table.insert(frontmatter, "source $nu.config-path")
+    table.insert(frontmatter, 'if ($"($env.PWD)/.env" | path exists) { open .env | load-env }')
+    
+    -- Extract user-defined frontmatter
+    for i, line in ipairs(lines) do
+        if line:match("^###%s*$") then
+            for j = 1, i - 1 do
+                local fm_line = lines[j]
+                if not fm_line:match("^%s*#") and not fm_line:match("^%s*$") then
+                    table.insert(frontmatter, fm_line)
+                end
+            end
+            break
+        end
+    end
+    
+    return table.concat(frontmatter, "\n")
+end
+```
+
+The frontmatter:
+1. Sources your Nushell config
+2. Loads `.env` if present in the current directory
+3. Includes all non-comment lines before `###`
+4. Is prepended to every command execution
+
+## Zsh Execution
+
+For standard shell commands, use Zsh execution:
+
+```bash
+# Any shell command works
+find . -name "*.lua" | wc -l
+
+# Or scripts
+for file in *.md; do
+  echo "Processing $file"
+  pandoc $file -o "${file%.md}.pdf"
+done
+```
+
+Press `<C-s>` to execute with Zsh.
+
+<Note>
+  Zsh execution does not use frontmatter - it's a direct shell execution.
+</Note>
+
+## Command Detection
+
+```lua ~/workspace/source/lua/fastfist/nushell.lua
+local function get_current_command()
+    local current_line = vim.api.nvim_win_get_cursor(0)[1]
+    local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
+    local start_line = current_line
+    local end_line = current_line
+    
+    -- Search backwards for the start
+    for i = current_line - 1, 1, -1 do
+        local line = lines[i]
+        if line:match("^%s*$") then
+            break
+        end
+        start_line = i
+    end
+    
+    -- Search forwards for the end
+    for i = current_line, #lines do
+        local line = lines[i]
+        if line:match("^%s*$") then
+            break
+        end
+        end_line = i
+    end
+    
+    return table.concat(vim.api.nvim_buf_get_lines(0, start_line - 1, end_line, false), "\n")
+end
+```
+
+The plugin automatically detects command blocks:
+- Starts from the current line
+- Extends up and down until it hits blank lines
+- Executes the entire block as one command
+
+## Floating Window
+
+### Features
+
+<CardGroup cols={2}>
+  <Card title="Large Display" icon="expand">
+    80% of your screen size for maximum visibility
+  </Card>
+  <Card title="Easy Dismiss" icon="xmark">
+    Close with `q` or `<Esc>`
+  </Card>
+  <Card title="Syntax Highlighting" icon="highlighter">
+    Output is highlighted based on the shell used
+  </Card>
+  <Card title="Scrollable" icon="arrows-up-down">
+    Navigate large outputs with standard vim motions
+  </Card>
+</CardGroup>
+
+### Configuration
+
+```lua ~/workspace/source/lua/fastfist/nushell.lua
+local function create_float()
+    local width = math.floor(vim.o.columns * 0.8)
+    local height = math.floor(vim.o.lines * 0.8)
+    
+    local buf = vim.api.nvim_create_buf(false, true)
+    local win = vim.api.nvim_open_win(buf, true, {
+        relative = "editor",
+        width = width,
+        height = height,
+        row = math.floor((vim.o.lines - height) / 2),
+        col = math.floor((vim.o.columns - width) / 2),
+        style = "minimal",
+        border = "rounded",
+    })
+    
+    vim.keymap.set("n", "q", ":q<CR>", { buffer = buf, silent = true })
+    vim.keymap.set("n", "<Esc>", ":q<CR>", { buffer = buf, silent = true })
+    
+    return buf, win
+end
+```
+
+## ANSI Color Stripping
+
+Nushell often outputs ANSI escape sequences for colors. The integration automatically strips these:
+
+```lua ~/workspace/source/lua/fastfist/nushell.lua
+local function strip_ansi(str)
+    local patterns = {
+        "\27%[%d+[%;%d]*m",           -- Color and style
+        "\27%[%d+[%;%d]*[ABCD]",      -- Cursor movement
+        "\27%[%d+[%;%d]*[EFGH]",      -- Cursor position
+        "\27%[%d*[JKPS]",             -- Clear screen/line
+        -- ... more patterns
+    }
+    
+    for _, pattern in ipairs(patterns) do
+        str = str:gsub(pattern, "")
+    end
+    return str
+end
+```
+
+This ensures clean, readable output in the floating window.
+
+## Use Cases
+
+<AccordionGroup>
+  <Accordion title="Data Exploration">
+    ```nu
+    # Setup data source
+    let api = "https://api.github.com"
+    
+    ###
+    
+    # Explore repositories
+    http get $"($api)/users/fastfist/repos" 
+      | select name stargazers_count 
+      | sort-by stargazers_count 
+      | reverse
+    ```
+    
+    Press `<C-n>` to run and see formatted results.
+  </Accordion>
+  
+  <Accordion title="Literate Programming">
+    Create executable documentation:
+    
+    ```markdown
+    # Data Processing Pipeline
+    
+    First, load the data:
+    
+    open data.csv | first 10
+    
+    Then transform it:
+    
+    open data.csv 
+      | where status == "active" 
+      | select name email created_at
+    ```
+    
+    Execute each code block with `<C-n>` to verify it works.
+  </Accordion>
+  
+  <Accordion title="Quick Scripting">
+    Test shell commands without leaving your editor:
+    
+    ```bash
+    # Count lines of code
+    find . -name "*.lua" -exec wc -l {} + | tail -1
+    ```
+    
+    Press `<C-s>` for immediate results.
+  </Accordion>
+  
+  <Accordion title="Environment Automation">
+    ```nu
+    # Variables from frontmatter
+    let project_dir = $env.PROJECT_PATH
+    let backup_dir = "~/backups"
+    
+    ###
+    
+    # Backup command
+    cp -r $project_dir $"($backup_dir)/(date now | format date '%Y-%m-%d')"
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Command History
+
+The last executed command is stored:
+
+```lua ~/workspace/source/lua/fastfist/nushell.lua
+local last_command_run = {
+    shell = "nushell",
+    cmd = "",
+}
+```
+
+Press `<C-f>` to rerun it - useful for:
+- Long-running queries
+- Commands that modify state
+- Iterative data exploration
+
+## Tips
+
+<Tip>
+  **Environment variables**: Use `.env` files in your project directory. They're automatically loaded into the Nushell environment.
+</Tip>
+
+<Tip>
+  **Table width**: The integration automatically sets table width to 80% of your window width for optimal formatting.
+</Tip>
+
+<Tip>
+  **Reusable snippets**: Create a file with common Nushell snippets and frontmatter, then execute different commands as needed.
+</Tip>
+
+<Warning>
+  Commands are executed in a temporary file. Side effects (like file creation) will persist, but the working directory is your current Neovim directory.
+</Warning>
+
+## NuRun Command
+
+You can also use the `:NuRun` command instead of keybindings:
+
+```vim
+:NuRun
+```
+
+This executes the current command block with Nushell.

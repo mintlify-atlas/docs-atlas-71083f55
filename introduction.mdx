@@ -1,0 +1,122 @@
+---
+title: Introduction
+description: A powerful, developer-focused Neovim configuration built for modern workflows
+---
+
+## Welcome to Fastfist
+
+Fastfist is a modern, feature-rich Neovim configuration designed for developers who demand speed, functionality, and seamless integration with their workflow. Built with Lua and leveraging the latest Neovim capabilities, this configuration provides a complete IDE-like experience without sacrificing the efficiency and speed that makes Neovim special.
+
+## Get started quickly
+
+<CardGroup cols={2}>
+  <Card
+    title="Installation"
+    icon="download"
+    href="/installation"
+  >
+    Install Fastfist and get your development environment ready
+  </Card>
+  <Card
+    title="Quick start"
+    icon="rocket"
+    href="/quickstart"
+  >
+    Learn the essential keybindings and workflows to start coding
+  </Card>
+  <Card
+    title="LSP configuration"
+    icon="code"
+    href="/features/lsp"
+  >
+    Explore powerful language server integration with autocomplete and diagnostics
+  </Card>
+  <Card
+    title="Telescope fuzzy finder"
+    icon="magnifying-glass"
+    href="/features/telescope"
+  >
+    Master file navigation and search with Telescope
+  </Card>
+</CardGroup>
+
+## Key features
+
+### Language Server Protocol (LSP)
+
+Full LSP integration powered by `lsp-zero` and Mason for automatic language server management. Get intelligent code completion, diagnostics, go-to-definition, hover documentation, and more for multiple languages including Rust, TypeScript, JavaScript, Python, and Lua.
+
+### Intelligent navigation
+
+**Telescope** provides blazing-fast fuzzy finding for files, live grep search, and more. **Harpoon** enables lightning-quick navigation between your most important files with custom keybindings.
+
+### Git integration
+
+Seamless Git workflow with Neogit for an intuitive Git interface, Gitsigns for inline Git blame and diff markers, and Diffview for powerful diff viewing. All accessible with simple keybindings.
+
+### Treesitter syntax highlighting
+
+Advanced syntax highlighting and code understanding powered by Tree-sitter. Supports multiple languages including C, Lua, Rust, TypeScript, JavaScript, Solidity, and Nushell with automatic parser installation.
+
+### Nushell integration
+
+Unique Nushell integration allows you to execute Nushell commands directly from within Neovim and view results in a floating window. Perfect for data exploration and scripting workflows.
+
+### AI-powered completion
+
+Integrated AI completion with Codeium and CodeCompanion for intelligent code suggestions that help you write code faster and with fewer errors.
+
+### Rich editing experience
+
+- **Autocompletion**: Powered by nvim-cmp with multiple sources including LSP, buffer, path, and snippets
+- **Code formatting**: Automatic formatting with conform.nvim supporting Prettier, Black, rustfmt, and more
+- **Comment toggling**: Fast comment/uncomment with Comment.nvim
+- **Undo tree**: Visual undo history with undotree
+- **Zen mode**: Distraction-free coding with zen-mode
+- **Status line**: Beautiful and informative status line with lualine
+
+## Design philosophy
+
+Fastfist is built on these core principles:
+
+- **Speed first**: Every feature is optimized for performance
+- **Developer-centric**: Keybindings and workflows designed for actual coding tasks
+- **Modern tooling**: Leverage the latest Neovim features and ecosystem plugins
+- **Sensible defaults**: Works great out of the box, customizable when needed
+- **Real workflow integration**: Git, LSP, and shell integration that actually fits your workflow
+
+<Note>
+  Fastfist uses Packer for plugin management. You'll need to run `:PackerSync` after installation to install all plugins.
+</Note>
+
+## What's included
+
+The configuration includes carefully selected and configured plugins:
+
+- **Navigation**: Telescope, Harpoon, Neo-tree
+- **LSP & Completion**: lsp-zero, Mason, nvim-cmp, LuaSnip
+- **Git**: Neogit, Gitsigns, Diffview
+- **Syntax**: Treesitter with context awareness
+- **UI**: Lualine, indent-blankline, multiple color schemes
+- **Editing**: Comment.nvim, vim-sleuth, undotree
+- **AI**: Codeium, CodeCompanion
+- **Special**: Nushell integration, YAML schema support, Rust tools
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card
+    title="Install now"
+    icon="download"
+    href="/installation"
+  >
+    Follow the installation guide to set up Fastfist
+  </Card>
+  <Card
+    title="Learn the basics"
+    icon="book"
+    href="/quickstart"
+  >
+    Get productive with essential keybindings and workflows
+  </Card>
+</CardGroup>

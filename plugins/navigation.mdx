@@ -1,0 +1,362 @@
+---
+title: "Navigation Plugins"
+description: "Telescope, Harpoon, and Neo-tree for efficient project navigation"
+---
+
+## Overview
+
+Navigation plugins help you quickly move around your codebase and manage files efficiently. This configuration includes three powerful navigation tools:
+
+<CardGroup cols={3}>
+  <Card title="Telescope" icon="magnifying-glass">
+    Fuzzy finder for files, text, and more
+  </Card>
+  <Card title="Harpoon" icon="bookmark">
+    Quick file and terminal navigation
+  </Card>
+  <Card title="Neo-tree" icon="folder-tree">
+    File explorer sidebar
+  </Card>
+</CardGroup>
+
+## Telescope
+
+[Telescope.nvim](https://github.com/nvim-telescope/telescope.nvim) is a highly extendable fuzzy finder that provides a unified interface for finding files, searching text, and more.
+
+### Installation
+
+```lua lua/fastfist/packer.lua:11-14
+use {
+    'nvim-telescope/telescope.nvim', tag = '0.1.5',
+    requires = { { 'nvim-lua/plenary.nvim' } }
+}
+```
+
+### Configuration
+
+Telescope keybindings are configured in `after/plugin/telescope.lua:1-4`:
+
+```lua after/plugin/telescope.lua
+local builtin = require('telescope.builtin')
+vim.keymap.set('n', '<C-p>', builtin.find_files, {})
+vim.keymap.set('n', '<C-_>', builtin.live_grep, {})
+vim.keymap.set('n', '<C-;>', builtin.live_grep, {})
+```
+
+### Keybindings
+
+<ParamField path="Ctrl+p" type="keymap">
+  Find files in the current project
+</ParamField>
+
+<ParamField path="Ctrl+/" type="keymap">
+  Live grep - search text across all files
+</ParamField>
+
+<ParamField path="Ctrl+;" type="keymap">
+  Live grep - alternative binding for terminals that don't support Ctrl+/
+</ParamField>
+
+### Usage Examples
+
+<Tabs>
+  <Tab title="Find Files">
+    Press `Ctrl+p` to open the file finder:
+    
+    <Steps>
+      <Step title="Open Telescope">
+        Press `Ctrl+p`
+      </Step>
+      <Step title="Type to filter">
+        Start typing to fuzzy search file names
+      </Step>
+      <Step title="Navigate and select">
+        Use arrow keys or `Ctrl+n/p` to navigate, `Enter` to open
+      </Step>
+    </Steps>
+  </Tab>
+  
+  <Tab title="Search Text">
+    Press `Ctrl+/` or `Ctrl+;` to search across files:
+    
+    <Steps>
+      <Step title="Open live grep">
+        Press `Ctrl+/`
+      </Step>
+      <Step title="Enter search term">
+        Type the text you want to find
+      </Step>
+      <Step title="Review results">
+        Browse matches with context from each file
+      </Step>
+    </Steps>
+  </Tab>
+</Tabs>
+
+<Tip>
+Telescope's fuzzy matching is smart - you don't need to type the complete filename. For example, typing "plgn" could match "plugin.lua".
+</Tip>
+
+## Harpoon
+
+[Harpoon](https://github.com/ThePrimeagen/harpoon) allows you to mark files and quickly navigate between them, as well as manage terminal windows.
+
+### Installation
+
+```lua lua/fastfist/packer.lua:15-18
+use {
+    'ThePrimeagen/harpoon',
+    requires = { { 'nvim-lua/plenary.nvim' } }
+}
+```
+
+### Configuration
+
+```lua after/plugin/harpoon.lua
+local term = require("harpoon.term")
+local mark = require("harpoon.mark")
+local ui = require("harpoon.ui")
+
+vim.keymap.set("n", "<leader>m", mark.add_file)
+vim.keymap.set("n", "<S-m>", ui.toggle_quick_menu)
+
+-- Terminal navigation
+vim.keymap.set("n", "<leader>ta", function() term.gotoTerminal(1) end)
+vim.keymap.set("n", "<leader>ts", function() term.gotoTerminal(2) end)
+vim.keymap.set("n", "<leader>td", function() term.gotoTerminal(3) end)
+vim.keymap.set("n", "<leader>tf", function() term.gotoTerminal(4) end)
+
+-- File navigation
+vim.keymap.set("n", "<leader>ma", function() ui.nav_file(1) end)
+vim.keymap.set("n", "<leader>ms", function() ui.nav_file(2) end)
+vim.keymap.set("n", "<leader>md", function() ui.nav_file(3) end)
+vim.keymap.set("n", "<leader>mf", function() ui.nav_file(4) end)
+```
+
+### File Marking Keybindings
+
+<ParamField path="<leader>m" type="keymap">
+  Mark the current file for quick access
+</ParamField>
+
+<ParamField path="Shift+m" type="keymap">
+  Toggle the Harpoon quick menu to see all marked files
+</ParamField>
+
+### File Navigation Keybindings
+
+<ResponseField name="File Slots" type="keymaps">
+  Jump to marked files using these keybindings:
+  
+  <Expandable title="File Navigation Keys">
+    <ParamField path="<leader>ma" type="keymap">
+      Navigate to file slot 1
+    </ParamField>
+    
+    <ParamField path="<leader>ms" type="keymap">
+      Navigate to file slot 2
+    </ParamField>
+    
+    <ParamField path="<leader>md" type="keymap">
+      Navigate to file slot 3
+    </ParamField>
+    
+    <ParamField path="<leader>mf" type="keymap">
+      Navigate to file slot 4
+    </ParamField>
+  </Expandable>
+</ResponseField>
+
+### Terminal Navigation Keybindings
+
+<ResponseField name="Terminal Slots" type="keymaps">
+  Jump to terminal instances:
+  
+  <Expandable title="Terminal Navigation Keys">
+    <ParamField path="<leader>ta" type="keymap">
+      Go to terminal 1
+    </ParamField>
+    
+    <ParamField path="<leader>ts" type="keymap">
+      Go to terminal 2
+    </ParamField>
+    
+    <ParamField path="<leader>td" type="keymap">
+      Go to terminal 3
+    </ParamField>
+    
+    <ParamField path="<leader>tf" type="keymap">
+      Go to terminal 4
+    </ParamField>
+  </Expandable>
+</ResponseField>
+
+### Harpoon Workflow
+
+<Steps>
+  <Step title="Mark important files">
+    Open a file and press `<leader>m` to add it to your Harpoon list
+  </Step>
+  
+  <Step title="View marked files">
+    Press `Shift+m` to see all marked files in the quick menu
+  </Step>
+  
+  <Step title="Quick navigation">
+    Use `<leader>ma/s/d/f` to instantly jump between your marked files
+  </Step>
+</Steps>
+
+<Info>
+Harpoon is designed for frequent file switching during development. Mark your most-used files and switch between them instantly!
+</Info>
+
+## Neo-tree
+
+[Neo-tree.nvim](https://github.com/nvim-neo-tree/neo-tree.nvim) is a modern file explorer that displays your project structure in a tree view.
+
+### Installation
+
+```lua lua/fastfist/packer.lua:40-48
+use {
+    "nvim-neo-tree/neo-tree.nvim",
+    branch = "v2.x",
+    requires = {
+        "nvim-lua/plenary.nvim",
+        "nvim-tree/nvim-web-devicons",
+        "MunifTanjim/nui.nvim",
+    }
+}
+```
+
+### Configuration
+
+```lua after/plugin/neo-tree.lua
+vim.cmd([[ let g:neo_tree_remove_legacy_commands = 1 ]])
+
+-- Diagnostic signs
+vim.fn.sign_define("DiagnosticSignError", { text = " ", texthl = "DiagnosticSignError" })
+vim.fn.sign_define("DiagnosticSignWarn", { text = " ", texthl = "DiagnosticSignWarn" })
+vim.fn.sign_define("DiagnosticSignInfo", { text = " ", texthl = "DiagnosticSignInfo" })
+vim.fn.sign_define("DiagnosticSignHint", { text = "", texthl = "DiagnosticSignHint" })
+
+require("neo-tree").setup({
+    window = {
+        position = "right",
+        mappings = {
+            ["w"] = ""
+        }
+    }
+})
+
+vim.keymap.set("n", "<leader>n", ":Neotree toggle<cr>")
+```
+
+### Keybindings
+
+<ParamField path="<leader>n" type="keymap">
+  Toggle Neo-tree file explorer sidebar
+</ParamField>
+
+### Configuration Highlights
+
+<AccordionGroup>
+  <Accordion title="Window Position">
+    Neo-tree opens on the **right side** of the editor by default.
+    
+    ```lua
+    window = {
+        position = "right",
+    }
+    ```
+  </Accordion>
+  
+  <Accordion title="Diagnostic Integration">
+    Neo-tree shows LSP diagnostics with custom icons:
+    
+    - Error
+    - Warning
+    - Info
+    - Hint
+    
+    These icons appear next to files with diagnostics issues.
+  </Accordion>
+  
+  <Accordion title="Custom Mappings">
+    The `w` key is unmapped to prevent conflicts with window navigation.
+  </Accordion>
+</AccordionGroup>
+
+### Neo-tree Navigation
+
+Once Neo-tree is open, you can use these keys:
+
+<ResponseField name="Neo-tree Keys" type="navigation">
+  <Expandable title="Common Operations">
+    - `Enter` - Open file or expand directory
+    - `o` - Open file
+    - `s` - Open in horizontal split
+    - `v` - Open in vertical split
+    - `t` - Open in new tab
+    - `a` - Add new file/directory
+    - `d` - Delete file/directory
+    - `r` - Rename file/directory
+    - `y` - Copy file/directory
+    - `x` - Cut file/directory
+    - `p` - Paste file/directory
+    - `R` - Refresh tree
+  </Expandable>
+</ResponseField>
+
+<Tip>
+Press `?` inside Neo-tree to see all available keybindings!
+</Tip>
+
+## Navigation Workflow Comparison
+
+<Card title="When to use each tool">
+  <AccordionGroup>
+    <Accordion title="Use Telescope when...">
+      - You need to find a file by name
+      - You want to search for text across the project
+      - You need fuzzy matching capabilities
+      - You're exploring unfamiliar codebases
+    </Accordion>
+    
+    <Accordion title="Use Harpoon when...">
+      - You're working with a small set of frequently accessed files
+      - You need instant switching between specific files
+      - You want to manage multiple terminal windows
+      - You're in a focused development session
+    </Accordion>
+    
+    <Accordion title="Use Neo-tree when...">
+      - You need to see the project structure visually
+      - You want to perform file operations (rename, delete, move)
+      - You need to see diagnostic issues across files
+      - You're organizing files and directories
+    </Accordion>
+  </AccordionGroup>
+</Card>
+
+## Summary
+
+<CardGroup cols={3}>
+  <Card title="Telescope" icon="magnifying-glass">
+    **Best for:** Finding and searching
+    
+    **Key binding:** `Ctrl+p`
+  </Card>
+  
+  <Card title="Harpoon" icon="bookmark">
+    **Best for:** Quick file switching
+    
+    **Key binding:** `<leader>m`
+  </Card>
+  
+  <Card title="Neo-tree" icon="folder-tree">
+    **Best for:** File management
+    
+    **Key binding:** `<leader>n`
+  </Card>
+</CardGroup>

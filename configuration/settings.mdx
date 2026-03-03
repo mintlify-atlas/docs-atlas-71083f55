@@ -1,0 +1,314 @@
+---
+title: Vim Settings
+description: All vim.opt settings and editor behavior configuration
+---
+
+This page documents all the Vim options configured in `lua/fastfist/set.lua`. These settings control the editor's appearance, behavior, and functionality.
+
+## Line Numbers
+
+<ParamField path="vim.opt.nu" type="boolean" default="true">
+  Enable absolute line numbers
+  ```lua
+  vim.opt.nu = true
+  ```
+</ParamField>
+
+<ParamField path="vim.opt.relativenumber" type="boolean" default="true">
+  Enable relative line numbers for easier motion commands
+  ```lua
+  vim.opt.relativenumber = true
+  ```
+</ParamField>
+
+<Info>
+Combining `nu` and `relativenumber` shows the absolute number on the current line and relative numbers on all other lines, which is ideal for motion commands like `10j` or `5k`.
+</Info>
+
+## Indentation & Tabs
+
+<CardGroup cols={2}>
+  <Card title="Tab Width" icon="ruler">
+    Set to 4 spaces
+  </Card>
+  <Card title="Tab Expansion" icon="expand">
+    Converts tabs to spaces
+  </Card>
+</CardGroup>
+
+| Setting | Value | Description |
+|---------|-------|-------------|
+| `tabstop` | 4 | Number of spaces a tab counts for |
+| `softtabstop` | 4 | Number of spaces inserted when hitting Tab |
+| `shiftwidth` | 4 | Number of spaces for each indentation level |
+| `expandtab` | true | Convert tabs to spaces |
+| `smartindent` | true | Smart autoindenting on new lines |
+
+```lua lua/fastfist/set.lua
+vim.opt.tabstop = 4
+vim.opt.softtabstop = 4
+vim.opt.shiftwidth = 4
+vim.opt.expandtab = true
+vim.opt.smartindent = true
+```
+
+<Note>
+`vim-sleuth` plugin is also installed, which automatically detects and adjusts indentation settings based on the current file. The above settings serve as defaults.
+</Note>
+
+## Line Wrapping
+
+<ParamField path="vim.opt.wrap" type="boolean" default="false">
+  Disable line wrapping by default
+  ```lua
+  vim.opt.wrap = false
+  ```
+</ParamField>
+
+<Tip>
+Line wrapping is disabled by default but is automatically enabled in Zen Mode for prose writing.
+</Tip>
+
+## Backup & Undo
+
+### File Persistence Settings
+
+<AccordionGroup>
+  <Accordion title="Swap Files" icon="file-slash">
+    Disabled to prevent clutter
+    ```lua
+    vim.opt.swapfile = false
+    ```
+  </Accordion>
+  
+  <Accordion title="Backup Files" icon="file-slash">
+    Disabled - rely on version control instead
+    ```lua
+    vim.opt.backup = false
+    ```
+  </Accordion>
+  
+  <Accordion title="Undo History" icon="clock-rotate-left">
+    Persistent undo saved to dedicated directory
+    ```lua
+    vim.opt.undodir = os.getenv("HOME") .. "/.vim/undodir"
+    vim.opt.undofile = true
+    ```
+    
+    <Warning>
+    Ensure the `~/.vim/undodir` directory exists, or create it with:
+    ```bash
+    mkdir -p ~/.vim/undodir
+    ```
+    </Warning>
+  </Accordion>
+</AccordionGroup>
+
+```lua lua/fastfist/set.lua
+vim.opt.swapfile = false
+vim.opt.backup = false
+vim.opt.undodir = os.getenv("HOME") .. "/.vim/undodir"
+vim.opt.undofile = true
+```
+
+<Info>
+Persistent undo allows you to undo changes even after closing and reopening a file. Use `<leader>u` to visualize undo history with undotree.
+</Info>
+
+## Search Behavior
+
+<CardGroup cols={2}>
+  <Card title="No Highlight" icon="highlighter">
+    `hlsearch = false` - Don't highlight all search matches
+  </Card>
+  <Card title="Incremental Search" icon="magnifying-glass">
+    `incsearch = true` - Show matches while typing
+  </Card>
+</CardGroup>
+
+```lua lua/fastfist/set.lua
+vim.opt.hlsearch = false
+vim.opt.incsearch = true
+```
+
+<Tip>
+With `hlsearch` disabled, search matches aren't persistently highlighted. Combined with the custom `n`/`N` keybindings that center the cursor, this provides a cleaner search experience.
+</Tip>
+
+## UI & Appearance
+
+### Colors
+
+<ParamField path="vim.opt.termguicolors" type="boolean" default="true">
+  Enable 24-bit RGB colors in the terminal
+  ```lua
+  vim.opt.termguicolors = true
+  ```
+</ParamField>
+
+<ParamField path="vim.opt.bg" type="string" default="dark">
+  Set background to dark mode
+  ```lua
+  vim.opt.bg = "dark"
+  ```
+</ParamField>
+
+<Info>
+`termguicolors` is required for modern colorschemes to display properly. Ensure your terminal emulator supports true color.
+</Info>
+
+### Scrolling & Cursor
+
+<ParamField path="vim.opt.scrolloff" type="number" default="8">
+  Keep 8 lines visible above/below cursor when scrolling
+  ```lua
+  vim.opt.scrolloff = 8
+  ```
+</ParamField>
+
+<Tip>
+A scrolloff of 8 ensures you always have context around your cursor, preventing it from being at the very top or bottom of the screen.
+</Tip>
+
+### Sign Column
+
+<ParamField path="vim.opt.signcolumn" type="string" default="yes">
+  Always show the sign column (for LSP diagnostics, git signs, etc.)
+  ```lua
+  vim.opt.signcolumn = "yes"
+  ```
+</ParamField>
+
+<Note>
+The sign column is set twice in the configuration (lines 25 and 29). The second setting at line 29 is the one that takes effect.
+</Note>
+
+```lua lua/fastfist/set.lua
+vim.opt.signcolumn = "yes"
+```
+
+<Info>
+Keeping the sign column always visible prevents the text from shifting when diagnostics or git signs appear.
+</Info>
+
+## File Handling
+
+<ParamField path="vim.opt.isfname" type="string">
+  Append `@-@` to allowed filename characters
+  ```lua
+  vim.opt.isfname:append("@-@")
+  ```
+</ParamField>
+
+<Tip>
+This setting allows filenames containing `@` characters (common in some package managers and modern tools) to be treated as single words for file operations.
+</Tip>
+
+## Performance
+
+<ParamField path="vim.opt.updatetime" type="number" default="50">
+  Faster update time for CursorHold events (in milliseconds)
+  ```lua
+  vim.opt.updatetime = 50
+  ```
+</ParamField>
+
+<Info>
+A lower `updatetime` makes LSP diagnostics and other async operations feel more responsive. The default is 4000ms (4 seconds), which is too slow for modern development.
+</Info>
+
+## Complete Settings Reference
+
+Here's the complete `set.lua` file with all settings:
+
+```lua lua/fastfist/set.lua
+vim.opt.nu = true
+vim.opt.relativenumber = true
+
+vim.opt.tabstop = 4
+vim.opt.softtabstop = 4
+vim.opt.shiftwidth = 4
+vim.opt.expandtab = true
+
+vim.opt.smartindent = true
+
+vim.opt.wrap = false
+
+vim.opt.swapfile = false
+vim.opt.backup = false
+vim.opt.undodir = os.getenv("HOME") .. "/.vim/undodir"
+vim.opt.undofile = true
+
+vim.opt.hlsearch = false
+vim.opt.incsearch = true
+
+vim.opt.termguicolors = true
+
+vim.opt.scrolloff = 8
+vim.opt.signcolumn = "yes"
+vim.opt.isfname:append("@-@")
+
+vim.opt.updatetime = 50
+vim.opt.signcolumn = "yes"
+vim.opt.bg = "dark"
+```
+
+## Settings by Category
+
+<AccordionGroup>
+  <Accordion title="UI & Visual" icon="eye">
+    - Line numbers (absolute + relative)
+    - No line wrapping
+    - Dark background
+    - True color support
+    - Always show sign column
+    - 8 line scroll offset
+  </Accordion>
+  
+  <Accordion title="Editing Behavior" icon="keyboard">
+    - 4-space tabs (expanded)
+    - Smart auto-indenting
+    - No search highlighting
+    - Incremental search
+  </Accordion>
+  
+  <Accordion title="File Management" icon="folder">
+    - No swap files
+    - No backup files
+    - Persistent undo history
+    - Support for `@` in filenames
+  </Accordion>
+  
+  <Accordion title="Performance" icon="gauge">
+    - 50ms update time for faster LSP
+  </Accordion>
+</AccordionGroup>
+
+## Customization Tips
+
+<Steps>
+  <Step title="Edit Settings">
+    Modify `lua/fastfist/set.lua` to change any vim.opt values
+  </Step>
+  <Step title="Reload Configuration">
+    Run `:source %` or restart Neovim to apply changes
+  </Step>
+  <Step title="Check Current Values">
+    Use `:set <option>?` to check current value (e.g., `:set tabstop?`)
+  </Step>
+</Steps>
+
+<Warning>
+Changing indentation settings may require adjusting the `vim-sleuth` plugin behavior if you want consistent formatting across files.
+</Warning>
+
+## Related Configuration
+
+<CardGroup cols={2}>
+  <Card title="Keybindings" icon="keyboard" href="/configuration/keybindings">
+    View all configured keybindings
+  </Card>
+  <Card title="Plugins" icon="puzzle-piece" href="/configuration/plugins">
+    Explore installed plugins
+  </Card>
+</CardGroup>

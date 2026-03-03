@@ -1,0 +1,380 @@
+---
+title: Code Formatting
+description: Automatic code formatting with Conform.nvim and multiple formatters
+---
+
+## Overview
+
+This configuration uses Conform.nvim to provide fast, reliable code formatting with support for multiple formatters per language.
+
+<CardGroup cols={2}>
+  <Card title="Fast Formatting" icon="bolt">
+    Async formatting that doesn't block your editor
+  </Card>
+  <Card title="Multiple Formatters" icon="layer-group">
+    Run multiple formatters sequentially or use fallbacks
+  </Card>
+  <Card title="LSP Integration" icon="plug">
+    Fallback to LSP formatting when needed
+  </Card>
+  <Card title="Per-Filetype" icon="file-code">
+    Different formatters for different languages
+  </Card>
+</CardGroup>
+
+## Configuration
+
+```lua ~/workspace/source/lua/fastfist/packer.lua
+require("conform").setup({
+    formatters_by_ft = {
+        lua = { "stylua" },
+        python = { "isort", "black" },
+        rust = { "rustfmt", lsp_format = "fallback" },
+        javascript = { "prettierd", "prettier", stop_after_first = true },
+        typescript = { "prettierd", "prettier", stop_after_first = true },
+    },
+})
+```
+
+## Keybinding
+
+```lua ~/workspace/source/after/plugin/lsp.lua
+vim.keymap.set("n", "<leader>f", conform.format)
+```
+
+**Usage:** `<leader>f` in normal mode to format the current buffer.
+
+<Tip>
+  The format command runs asynchronously, so you can continue editing while formatting happens in the background.
+</Tip>
+
+## Language-Specific Formatters
+
+<Tabs>
+  <Tab title="Lua">
+    ```lua
+    lua = { "stylua" }
+    ```
+    
+    Uses [stylua](https://github.com/JohnnyMorganz/StyLua) for opinionated Lua formatting.
+    
+    **Install:**
+    ```bash
+    cargo install stylua
+    # or
+    brew install stylua
+    ```
+  </Tab>
+  
+  <Tab title="Python">
+    ```lua
+    python = { "isort", "black" }
+    ```
+    
+    Runs two formatters sequentially:
+    1. **isort** - Sorts imports
+    2. **black** - Formats code
+    
+    **Install:**
+    ```bash
+    pip install isort black
+    ```
+  </Tab>
+  
+  <Tab title="Rust">
+    ```lua
+    rust = { "rustfmt", lsp_format = "fallback" }
+    ```
+    
+    Uses rustfmt, with fallback to LSP formatting if rustfmt is unavailable.
+    
+    **Install:**
+    ```bash
+    rustup component add rustfmt
+    ```
+  </Tab>
+  
+  <Tab title="JavaScript/TypeScript">
+    ```lua
+    javascript = { "prettierd", "prettier", stop_after_first = true },
+    typescript = { "prettierd", "prettier", stop_after_first = true },
+    ```
+    
+    Tries prettierd (faster daemon) first, falls back to prettier if unavailable.
+    
+    **Install:**
+    ```bash
+    npm install -g @fsouza/prettierd prettier
+    # or
+    yarn global add @fsouza/prettierd prettier
+    ```
+  </Tab>
+</Tabs>
+
+## Formatter Strategies
+
+### Sequential Formatters
+
+```lua
+python = { "isort", "black" }
+```
+
+Runs formatters in order:
+1. isort sorts imports
+2. black formats the result
+
+Use this when formatters complement each other.
+
+### First Available
+
+```lua
+javascript = { "prettierd", "prettier", stop_after_first = true }
+```
+
+Tries formatters in order, stops at the first one that succeeds:
+1. Try prettierd (fast)
+2. If unavailable, use prettier (reliable)
+
+Use this for formatter alternatives or fallbacks.
+
+### LSP Fallback
+
+```lua
+rust = { "rustfmt", lsp_format = "fallback" }
+```
+
+Uses dedicated formatter, falls back to LSP if unavailable:
+1. Try rustfmt
+2. If unavailable, use rust-analyzer's formatting
+
+Use this for languages where the LSP provides good formatting.
+
+## Adding More Languages
+
+To add formatting for additional languages, update the configuration:
+
+<CodeGroup>
+```lua Example: Adding Go
+formatters_by_ft = {
+    -- Existing formatters...
+    go = { "gofmt", "goimports" },
+}
+```
+
+```lua Example: Adding JSON
+formatters_by_ft = {
+    -- Existing formatters...
+    json = { "jq" },
+}
+```
+
+```lua Example: Adding CSS
+formatters_by_ft = {
+    -- Existing formatters...
+    css = { "prettierd", "prettier", stop_after_first = true },
+    scss = { "prettierd", "prettier", stop_after_first = true },
+}
+```
+</CodeGroup>
+
+## Format Options
+
+You can customize format behavior per language:
+
+```lua
+require("conform").setup({
+    formatters_by_ft = {
+        python = { "black" },
+    },
+    formatters = {
+        black = {
+            -- Customize black options
+            prepend_args = { "--line-length", "100" },
+        },
+    },
+})
+```
+
+<Accordion title="Common formatter options">
+  - `prepend_args` - Add arguments before formatter's default args
+  - `append_args` - Add arguments after formatter's default args
+  - `command` - Override the command to run
+  - `stdin` - Whether to pass input via stdin (default: true)
+  - `cwd` - Working directory for the formatter
+</Accordion>
+
+## Installation Methods
+
+<Tabs>
+  <Tab title="Mason">
+    Install formatters through Mason (LSP installer):
+    
+    ```vim
+    :Mason
+    ```
+    
+    Navigate to the formatter you want and press `i` to install.
+    
+    <Note>
+      Mason provides pre-built binaries for many formatters, making installation easy.
+    </Note>
+  </Tab>
+  
+  <Tab title="Package Manager">
+    Use your system's package manager:
+    
+    ```bash
+    # Homebrew (macOS)
+    brew install stylua
+    
+    # apt (Ubuntu/Debian)
+    sudo apt install black
+    
+    # pacman (Arch)
+    sudo pacman -S prettier
+    ```
+  </Tab>
+  
+  <Tab title="Language Package Manager">
+    Use language-specific package managers:
+    
+    ```bash
+    # Node.js
+    npm install -g prettier
+    
+    # Python
+    pip install black
+    
+    # Rust
+    cargo install stylua
+    ```
+  </Tab>
+</Tabs>
+
+## Auto-Format on Save
+
+To format automatically when saving:
+
+```lua
+require("conform").setup({
+    formatters_by_ft = {
+        -- Your formatters...
+    },
+    format_on_save = {
+        timeout_ms = 500,
+        lsp_fallback = true,
+    },
+})
+```
+
+<Warning>
+  Format on save is not enabled by default in this configuration. You must manually trigger formatting with `<leader>f`.
+</Warning>
+
+## Manual Formatting
+
+You can also format from the command line:
+
+```vim
+" Format entire buffer
+:lua require("conform").format()
+
+" Format with specific formatter
+:lua require("conform").format({ formatters = { "stylua" } })
+
+" Format range (visual selection)
+:'<,'>lua require("conform").format()
+```
+
+## Checking Available Formatters
+
+See which formatters are available for the current buffer:
+
+```vim
+:ConformInfo
+```
+
+This shows:
+- Configured formatters for the current filetype
+- Whether each formatter is available (installed)
+- The command that would be run
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Formatter not found">
+    Check if the formatter is installed:
+    
+    ```bash
+    which stylua
+    which black
+    which prettier
+    ```
+    
+    If not found, install it using one of the methods above.
+  </Accordion>
+  
+  <Accordion title="Wrong formatter arguments">
+    Check the formatter's actual arguments:
+    
+    ```vim
+    :ConformInfo
+    ```
+    
+    Then customize with `prepend_args` or `append_args` in the config.
+  </Accordion>
+  
+  <Accordion title="Formatting is slow">
+    For JavaScript/TypeScript, ensure you're using prettierd:
+    
+    ```bash
+    npm install -g @fsouza/prettierd
+    ```
+    
+    Prettierd runs as a daemon and is much faster than prettier for repeated formatting.
+  </Accordion>
+  
+  <Accordion title="Format doesn't match team standards">
+    Most formatters read configuration files:
+    
+    - **Prettier**: `.prettierrc`, `prettier.config.js`
+    - **Black**: `pyproject.toml`
+    - **Stylua**: `stylua.toml`
+    - **Rustfmt**: `rustfmt.toml`
+    
+    Add these files to your project root to customize formatting.
+  </Accordion>
+</AccordionGroup>
+
+## Integration with LSP
+
+The formatting keybinding is set in the LSP configuration:
+
+```lua ~/workspace/source/after/plugin/lsp.lua
+local conform = require("conform")
+
+lsp.on_attach(function(client, bufnr)
+    vim.keymap.set("n", "<leader>f", conform.format)
+    -- Other LSP keybindings...
+end)
+```
+
+This ensures the formatting keybinding is available in all buffers with LSP attached.
+
+## Tips
+
+<Tip>
+  **Project-specific config**: Add formatter config files (`.prettierrc`, `stylua.toml`, etc.) to your project to ensure consistent formatting across your team.
+</Tip>
+
+<Tip>
+  **Format before commit**: Consider adding a git pre-commit hook that runs formatters automatically.
+</Tip>
+
+<Tip>
+  **Visual mode formatting**: Select code in visual mode and press `<leader>f` to format just the selection (if the formatter supports range formatting).
+</Tip>
+
+<Warning>
+  Some formatters may modify files beyond the visible changes (like adding imports or reorganizing code). Always review formatted changes before committing.
+</Warning>

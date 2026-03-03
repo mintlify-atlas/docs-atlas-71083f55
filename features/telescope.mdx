@@ -1,0 +1,155 @@
+---
+title: Telescope
+description: Fuzzy finder for files, text, and more with Telescope
+---
+
+## Overview
+
+Telescope is a highly extendable fuzzy finder that provides fast navigation through files, live grep search, and more.
+
+<CardGroup cols={2}>
+  <Card title="Find Files" icon="magnifying-glass">
+    Lightning-fast file navigation
+  </Card>
+  <Card title="Live Grep" icon="code">
+    Search across your entire codebase
+  </Card>
+</CardGroup>
+
+## Configuration
+
+The Telescope configuration is minimal and focused on the most essential features:
+
+```lua ~/workspace/source/after/plugin/telescope.lua
+local builtin = require('telescope.builtin')
+vim.keymap.set('n', '<C-p>', builtin.find_files, {})
+vim.keymap.set('n', '<C-_>', builtin.live_grep, {})
+vim.keymap.set('n', '<C-;>', builtin.live_grep, {})
+```
+
+## Keybindings
+
+### Find Files
+
+<CodeGroup>
+```bash Keybinding
+<C-p>
+```
+
+```lua Function
+builtin.find_files
+```
+</CodeGroup>
+
+Quickly find and open files in your project. Uses fuzzy matching to find files as you type.
+
+**Usage:**
+1. Press `<C-p>` in normal mode
+2. Start typing the filename
+3. Navigate with `<C-n>` / `<C-p>` or arrow keys
+4. Press `<CR>` to open the file
+
+<Note>
+  Telescope respects `.gitignore` by default, so ignored files won't appear in results.
+</Note>
+
+### Live Grep
+
+<CodeGroup>
+```bash Keybindings
+<C-_>  (Ctrl + /)
+<C-;>  (Ctrl + ;)
+```
+
+```lua Function
+builtin.live_grep
+```
+</CodeGroup>
+
+Search for text across all files in your project in real-time.
+
+**Usage:**
+1. Press `<C-_>` or `<C-;>` in normal mode
+2. Type your search query
+3. Results update as you type
+4. Navigate through results and press `<CR>` to open
+
+<Tip>
+  Two keybindings are provided for live grep to accommodate different terminal emulators that may interpret `<C-_>` differently.
+</Tip>
+
+## Telescope Navigation
+
+Inside any Telescope picker:
+
+| Keybinding | Action |
+|------------|--------|
+| `<C-n>` / `<Down>` | Next item |
+| `<C-p>` / `<Up>` | Previous item |
+| `<CR>` | Select item |
+| `<C-x>` | Open in horizontal split |
+| `<C-v>` | Open in vertical split |
+| `<C-t>` | Open in new tab |
+| `<C-u>` | Scroll preview up |
+| `<C-d>` | Scroll preview down |
+| `<C-c>` / `<Esc>` | Close Telescope |
+
+## Features
+
+<AccordionGroup>
+  <Accordion title="Fuzzy Matching">
+    Telescope uses fuzzy matching algorithms to find files even if you don't type the exact name. For example:
+    
+    - Typing `tlsc` will match `telescope.lua`
+    - Typing `ap/pl/lsp` will match `after/plugin/lsp.lua`
+    
+    This makes navigation extremely fast when you know roughly what you're looking for.
+  </Accordion>
+  
+  <Accordion title="Preview Window">
+    Telescope shows a preview of files and grep results as you navigate through them, helping you find the right file or match without opening it first.
+  </Accordion>
+  
+  <Accordion title="Multi-Selection">
+    Use `<Tab>` to select multiple items in Telescope. All selected items can be opened at once with `<CR>`.
+  </Accordion>
+</AccordionGroup>
+
+## Example Workflow
+
+<Steps>
+  <Step title="Find a file">
+    Press `<C-p>` and type part of the filename
+  </Step>
+  <Step title="Preview">
+    Navigate through matches with `<C-n>` / `<C-p>` and preview content
+  </Step>
+  <Step title="Open">
+    Press `<CR>` to open in current buffer, or `<C-v>` for vertical split
+  </Step>
+</Steps>
+
+## Tips
+
+<Tip>
+  **Quick file switching**: When you know the filename, `<C-p>` followed by a few characters is faster than navigating file trees.
+</Tip>
+
+<Tip>
+  **Project-wide search**: Use `<C-_>` to search for functions, variables, or text patterns across your entire codebase.
+</Tip>
+
+<Warning>
+  Live grep requires `ripgrep` to be installed on your system. Install it with:
+  
+  ```bash
+  # macOS
+  brew install ripgrep
+  
+  # Ubuntu/Debian
+  apt install ripgrep
+  
+  # Arch
+  pacman -S ripgrep
+  ```
+</Warning>

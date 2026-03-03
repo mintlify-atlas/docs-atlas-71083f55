@@ -1,0 +1,575 @@
+---
+title: "AI & Completion"
+description: "Codeium and CodeCompanion for AI-powered code assistance"
+---
+
+## Overview
+
+This configuration includes two AI-powered plugins that enhance your coding experience with intelligent suggestions and AI assistance:
+
+<CardGroup cols={2}>
+  <Card title="Codeium" icon="sparkles">
+    Free AI-powered code completion
+  </Card>
+  <Card title="CodeCompanion" icon="robot">
+    AI pair programming assistant
+  </Card>
+</CardGroup>
+
+## Codeium
+
+[Codeium](https://codeium.com/) is a free AI-powered code completion tool that provides intelligent suggestions as you type. It's similar to GitHub Copilot but completely free.
+
+### Installation
+
+```lua lua/fastfist/packer.lua:150
+use 'Exafunction/codeium.vim'
+```
+
+### Configuration
+
+Codeium is configured with a simple keybinding in `after/plugin/lsp.lua:166`:
+
+```lua after/plugin/lsp.lua
+vim.api.nvim_set_keymap('i', '<M-CR>', 'codeium#Accept()', { expr=true, noremap = true, silent = true })
+vim.g.copilot_no_tab_map = true
+```
+
+### Keybindings
+
+<ParamField path="Alt+Enter" type="keymap" required>
+  Accept the current Codeium suggestion
+</ParamField>
+
+<Note>
+The keybinding uses `<M-CR>` which means **Alt+Enter** (Meta key + Enter) in insert mode.
+</Note>
+
+### How Codeium Works
+
+<Steps>
+  <Step title="Start typing">
+    Codeium automatically activates as you write code
+  </Step>
+  
+  <Step title="View suggestions">
+    Suggestions appear as ghost text in gray
+  </Step>
+  
+  <Step title="Accept suggestions">
+    Press `Alt+Enter` to accept the suggestion
+  </Step>
+  
+  <Step title="Continue coding">
+    Keep typing normally - Codeium adapts to your style
+  </Step>
+</Steps>
+
+### Features
+
+<AccordionGroup>
+  <Accordion title="Multi-Language Support">
+    Codeium supports 70+ programming languages including:
+    
+    - **JavaScript/TypeScript** - Full support for modern JS/TS
+    - **Python** - Excellent for data science and general programming
+    - **Rust** - Smart completions for systems programming
+    - **Go** - Great for backend development
+    - **Java/C#** - Enterprise language support
+    - **HTML/CSS** - Frontend development
+    - **Lua** - Perfect for Neovim configuration
+    - And many more!
+  </Accordion>
+  
+  <Accordion title="Context-Aware Suggestions">
+    Codeium analyzes:
+    
+    - The current file context
+    - Other files in your project
+    - Your coding patterns
+    - Common programming idioms
+    - Library and framework conventions
+    
+    This results in highly relevant suggestions.
+  </Accordion>
+  
+  <Accordion title="Multi-Line Completions">
+    Codeium can suggest:
+    
+    - Single line completions
+    - Multiple lines of code
+    - Entire function bodies
+    - Complete class definitions
+    - Documentation comments
+  </Accordion>
+  
+  <Accordion title="Free for Everyone">
+    Unlike some AI coding assistants:
+    
+    - No subscription required
+    - Unlimited completions
+    - No credit card needed
+    - Individual use is completely free
+  </Accordion>
+</AccordionGroup>
+
+### Usage Examples
+
+<Tabs>
+  <Tab title="Function Completion">
+    ```typescript
+    // You type:
+    function calculateTotal(items
+    
+    // Codeium suggests:
+    function calculateTotal(items: Item[]): number {
+      return items.reduce((sum, item) => sum + item.price, 0);
+    }
+    ```
+    
+    Press `Alt+Enter` to accept the suggestion.
+  </Tab>
+  
+  <Tab title="Loop Generation">
+    ```python
+    # You type:
+    # iterate through users and
+    
+    # Codeium suggests:
+    for user in users:
+        if user.is_active:
+            send_notification(user)
+    ```
+  </Tab>
+  
+  <Tab title="Import Statements">
+    ```lua
+    -- You type:
+    local telescope
+    
+    -- Codeium suggests:
+    local telescope = require('telescope.builtin')
+    ```
+  </Tab>
+  
+  <Tab title="Documentation">
+    ```rust
+    // You type:
+    /// Calculate
+    
+    // Codeium suggests:
+    /// Calculates the fibonacci number at position n
+    /// 
+    /// # Arguments
+    /// * `n` - The position in the fibonacci sequence
+    /// 
+    /// # Returns
+    /// The fibonacci number at position n
+    fn fibonacci(n: u32) -> u32 {
+    ```
+  </Tab>
+</Tabs>
+
+<Tip>
+Codeium learns from your coding style. The more you use it in a project, the better its suggestions become!
+</Tip>
+
+### Codeium Setup
+
+On first use, you'll need to authenticate:
+
+<Steps>
+  <Step title="Start Neovim">
+    Open Neovim in any project
+  </Step>
+  
+  <Step title="Trigger authentication">
+    Start typing in a code file - Codeium will prompt for authentication
+  </Step>
+  
+  <Step title="Open authentication page">
+    Follow the URL provided to authenticate in your browser
+  </Step>
+  
+  <Step title="Complete setup">
+    Return to Neovim - you're ready to use Codeium!
+  </Step>
+</Steps>
+
+<Warning>
+Make sure you have an internet connection when using Codeium, as it requires communication with Codeium's servers for suggestions.
+</Warning>
+
+## CodeCompanion
+
+[CodeCompanion.nvim](https://github.com/olimorris/codecompanion.nvim) is an AI-powered pair programming assistant that integrates with various AI providers.
+
+### Installation
+
+```lua lua/fastfist/packer.lua:152-161
+use({
+    "olimorris/codecompanion.nvim",
+    config = function()
+        require("codecompanion").setup()
+    end,
+    requires = {
+        "nvim-lua/plenary.nvim",
+        "nvim-treesitter/nvim-treesitter",
+    }
+})
+```
+
+### Features
+
+<CardGroup cols={2}>
+  <Card title="Chat Interface" icon="comments">
+    Interactive AI chat within Neovim
+  </Card>
+  
+  <Card title="Code Actions" icon="wand-magic-sparkles">
+    AI-powered code transformations
+  </Card>
+  
+  <Card title="Context Aware" icon="brain">
+    Uses your code context for better answers
+  </Card>
+  
+  <Card title="Multiple Providers" icon="plug">
+    Supports OpenAI, Anthropic, and more
+  </Card>
+</CardGroup>
+
+### Configuration
+
+CodeCompanion is set up with default configuration:
+
+```lua
+require("codecompanion").setup()
+```
+
+<Note>
+CodeCompanion requires additional setup to connect to an AI provider (like OpenAI). You'll need to configure API keys separately.
+</Note>
+
+### Basic Usage
+
+<AccordionGroup>
+  <Accordion title="Open Chat">
+    Use CodeCompanion's commands to open an AI chat interface:
+    
+    ```vim
+    :CodeCompanionChat
+    ```
+    
+    This opens a split window where you can chat with the AI about your code.
+  </Accordion>
+  
+  <Accordion title="Inline Actions">
+    Select code and use CodeCompanion actions:
+    
+    ```vim
+    :CodeCompanionActions
+    ```
+    
+    Choose from actions like:
+    - Explain this code
+    - Add documentation
+    - Refactor this function
+    - Write tests
+    - Fix bugs
+  </Accordion>
+  
+  <Accordion title="Add Context">
+    CodeCompanion automatically includes:
+    
+    - The current file
+    - Selected text
+    - Language context
+    - Your question or instruction
+  </Accordion>
+</AccordionGroup>
+
+### CodeCompanion vs Codeium
+
+<CardGroup cols={2}>
+  <Card title="Codeium" icon="sparkles">
+    **Best for:**
+    - Autocomplete while typing
+    - Quick code suggestions
+    - Learning common patterns
+    - Daily coding flow
+    
+    **Type:** Completion engine
+  </Card>
+  
+  <Card title="CodeCompanion" icon="robot">
+    **Best for:**
+    - Asking questions about code
+    - Explaining complex logic
+    - Refactoring assistance
+    - Code reviews
+    
+    **Type:** AI assistant
+  </Card>
+</CardGroup>
+
+### Setting Up AI Provider
+
+To use CodeCompanion, you need to configure an AI provider:
+
+<Tabs>
+  <Tab title="OpenAI">
+    Add to your Neovim configuration:
+    
+    ```lua
+    require("codecompanion").setup({
+      adapters = {
+        openai = {
+          api_key = "your-api-key",
+        },
+      },
+      default_adapter = "openai",
+    })
+    ```
+    
+    <Warning>
+    Never commit API keys to version control! Use environment variables instead:
+    
+    ```lua
+    api_key = os.getenv("OPENAI_API_KEY"),
+    ```
+    </Warning>
+  </Tab>
+  
+  <Tab title="Anthropic (Claude)">
+    Configure for Claude:
+    
+    ```lua
+    require("codecompanion").setup({
+      adapters = {
+        anthropic = {
+          api_key = os.getenv("ANTHROPIC_API_KEY"),
+        },
+      },
+      default_adapter = "anthropic",
+    })
+    ```
+  </Tab>
+  
+  <Tab title="Local Models">
+    Use local AI models:
+    
+    ```lua
+    require("codecompanion").setup({
+      adapters = {
+        ollama = {
+          model = "codellama",
+        },
+      },
+      default_adapter = "ollama",
+    })
+    ```
+  </Tab>
+</Tabs>
+
+### Example Workflows
+
+<Steps>
+  <Step title="Explaining Code">
+    Select a complex function and ask CodeCompanion:
+    
+    ```
+    :CodeCompanionChat
+    > Can you explain what this function does?
+    ```
+  </Step>
+  
+  <Step title="Writing Tests">
+    Highlight a function:
+    
+    ```
+    :CodeCompanionActions
+    > Select "Write tests for this code"
+    ```
+  </Step>
+  
+  <Step title="Refactoring">
+    Ask for improvements:
+    
+    ```
+    :CodeCompanionChat
+    > How can I refactor this to be more efficient?
+    ```
+  </Step>
+  
+  <Step title="Documentation">
+    Generate docs:
+    
+    ```
+    :CodeCompanionActions
+    > Select "Add documentation"
+    ```
+  </Step>
+</Steps>
+
+## AI Completion Workflow
+
+Use both tools together for maximum productivity:
+
+<Steps>
+  <Step title="Code with Codeium">
+    Let Codeium suggest completions as you write
+    
+    Press `Alt+Enter` to accept suggestions
+  </Step>
+  
+  <Step title="Consult CodeCompanion">
+    When stuck, open CodeCompanion chat
+    
+    Ask questions about architecture or complex problems
+  </Step>
+  
+  <Step title="Refine with AI">
+    Use CodeCompanion actions to:
+    - Improve code quality
+    - Add tests
+    - Write documentation
+  </Step>
+  
+  <Step title="Iterate">
+    Continue coding with Codeium's suggestions
+  </Step>
+</Steps>
+
+## Quick Reference
+
+<CardGroup cols={2}>
+  <Card title="Accept Codeium" icon="keyboard">
+    ```
+    Alt+Enter
+    ```
+    
+    Accept AI code suggestion
+  </Card>
+  
+  <Card title="Open CodeCompanion" icon="terminal">
+    ```vim
+    :CodeCompanionChat
+    ```
+    
+    Start AI conversation
+  </Card>
+  
+  <Card title="Code Actions" icon="list">
+    ```vim
+    :CodeCompanionActions
+    ```
+    
+    Apply AI transformations
+  </Card>
+  
+  <Card title="Authentication" icon="key">
+    First use requires:
+    - Codeium: Browser auth
+    - CodeCompanion: API key
+  </Card>
+</CardGroup>
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Review AI Suggestions">
+    Always review code suggested by AI tools:
+    
+    - Check for correctness
+    - Ensure it matches your coding style
+    - Verify security implications
+    - Test thoroughly
+  </Accordion>
+  
+  <Accordion title="Use as Learning Tools">
+    AI assistants are great for learning:
+    
+    - Ask "why" questions about suggestions
+    - Request explanations of unfamiliar patterns
+    - Learn new language features
+    - Discover best practices
+  </Accordion>
+  
+  <Accordion title="Provide Context">
+    Give AI tools context for better results:
+    
+    - Write clear function names
+    - Add comments describing intent
+    - Keep related code nearby
+    - Use descriptive variable names
+  </Accordion>
+  
+  <Accordion title="Privacy Considerations">
+    Be mindful of what code you share:
+    
+    - Avoid sending sensitive information
+    - Check your company's AI usage policies
+    - Don't share proprietary algorithms
+    - Review terms of service
+  </Accordion>
+</AccordionGroup>
+
+<Warning>
+AI-generated code should be treated as a starting point, not a final solution. Always review, test, and understand the code before using it in production.
+</Warning>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Codeium not showing suggestions">
+    Check these items:
+    
+    1. Verify you're authenticated (restart Neovim if needed)
+    2. Ensure you have an internet connection
+    3. Check if the file type is supported
+    4. Try manually triggering with `:Codeium Enable`
+  </Accordion>
+  
+  <Accordion title="CodeCompanion not responding">
+    Common issues:
+    
+    1. Verify API key is set correctly
+    2. Check API provider status
+    3. Ensure you have API credits/quota
+    4. Check error messages in `:messages`
+  </Accordion>
+  
+  <Accordion title="Alt+Enter not working">
+    If the keybinding doesn't work:
+    
+    1. Check if your terminal supports Alt key
+    2. Try using `<M-CR>` in terminal settings
+    3. Consider remapping to a different key
+    4. Test in different terminal emulators
+  </Accordion>
+</AccordionGroup>
+
+## Summary
+
+<Info>
+Both AI tools are configured to work seamlessly with this Neovim setup. Codeium provides instant completions, while CodeCompanion offers deeper AI assistance for complex tasks.
+</Info>
+
+<CardGroup cols={2}>
+  <Card title="Codeium" icon="sparkles">
+    **Setup:** Automatic browser auth
+    
+    **Cost:** Free forever
+    
+    **Usage:** Inline completions with `Alt+Enter`
+  </Card>
+  
+  <Card title="CodeCompanion" icon="robot">
+    **Setup:** API key required
+    
+    **Cost:** Depends on provider
+    
+    **Usage:** Chat and actions via commands
+  </Card>
+</CardGroup>

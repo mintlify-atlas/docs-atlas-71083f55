@@ -1,0 +1,653 @@
+---
+title: Plugins
+description: Complete list of installed plugins and their configurations
+---
+
+This configuration uses [Packer.nvim](https://github.com/wbthomason/packer.nvim) as the plugin manager. All plugins are declared in `lua/fastfist/packer.lua` and configured in corresponding files under `after/plugin/`.
+
+## Plugin Manager
+
+<ParamField path="Packer.nvim" type="plugin">
+  Plugin manager that can manage itself
+  ```lua
+  use 'wbthomason/packer.nvim'
+  ```
+  
+  **Keybinding**: `<leader>s` runs `:PackerSync`
+</ParamField>
+
+<Info>
+Run `:PackerSync` to install, update, and clean plugins. The command both installs missing plugins and removes unused ones.
+</Info>
+
+## LSP & Language Support
+
+### Core LSP Infrastructure
+
+<CardGroup cols={2}>
+  <Card title="LSP Zero" icon="code">
+    Simplified LSP configuration
+    
+    `VonHeikemen/lsp-zero.nvim`
+  </Card>
+  <Card title="LSP Config" icon="gear">
+    Official LSP configuration plugin
+    
+    `neovim/nvim-lspconfig`
+  </Card>
+  <Card title="Mason" icon="toolbox">
+    Portable LSP server installer
+    
+    `williamboman/mason.nvim`
+  </Card>
+  <Card title="Mason LSP Config" icon="plug">
+    Bridge between Mason and LSP config
+    
+    `williamboman/mason-lspconfig.nvim`
+  </Card>
+</CardGroup>
+
+```lua lua/fastfist/packer.lua
+use {
+    'VonHeikemen/lsp-zero.nvim',
+    branch = 'v2.x',
+    requires = {
+        -- LSP Support
+        { 'neovim/nvim-lspconfig' },
+        { 'williamboman/mason.nvim' },
+        { 'williamboman/mason-lspconfig.nvim' },
+        -- ... (completion plugins below)
+    }
+}
+```
+
+<Tip>
+LSP Zero provides sensible defaults and simplified configuration. It's configured in `after/plugin/lsp.lua`.
+</Tip>
+
+### Completion Engine
+
+<AccordionGroup>
+  <Accordion title="nvim-cmp" icon="square-check">
+    Main completion engine
+    
+    ```lua
+    use { 'hrsh7th/nvim-cmp' }
+    ```
+    
+    **Sources**:
+    - `cmp-buffer` - Buffer word completion
+    - `cmp-path` - Filesystem path completion
+    - `cmp-nvim-lsp` - LSP completion source
+    - `cmp-nvim-lua` - Neovim Lua API completion
+    - `cmp-cmdline` - Command-line completion
+    - `cmp_luasnip` - Snippet completion
+  </Accordion>
+  
+  <Accordion title="LuaSnip" icon="scissors">
+    Snippet engine
+    
+    ```lua
+    use { 'L3MON4D3/LuaSnip' }
+    use { 'rafamadriz/friendly-snippets' }
+    ```
+    
+    Includes friendly-snippets for common snippet collections.
+  </Accordion>
+</AccordionGroup>
+
+### Language-Specific Tools
+
+<CardGroup cols={2}>
+  <Card title="Rust Tools" icon="rust">
+    Enhanced Rust support with rust-analyzer integration
+    
+    `simrat39/rust-tools.nvim`
+    
+    **Extra keybindings**:
+    - `K` - Hover actions
+    - `<leader>t` - Open Cargo.toml
+  </Card>
+  <Card title="SchemaStore" icon="database">
+    JSON schema support for JSON/YAML files
+    
+    `b0o/schemastore.nvim`
+  </Card>
+  <Card title="YAML Companion" icon="file-code">
+    YAML schema support and Kubernetes integration
+    
+    `someone-stole-my-name/yaml-companion.nvim`
+  </Card>
+</CardGroup>
+
+```lua lua/fastfist/packer.lua
+use 'simrat39/rust-tools.nvim'
+use "b0o/schemastore.nvim"
+use {
+    "someone-stole-my-name/yaml-companion.nvim",
+    requires = {
+        { "neovim/nvim-lspconfig" },
+        { "nvim-lua/plenary.nvim" },
+        { "nvim-telescope/telescope.nvim" },
+    },
+    config = function()
+        require("telescope").load_extension("yaml_schema")
+    end,
+}
+```
+
+### Code Formatting
+
+<ParamField path="Conform.nvim" type="formatter">
+  Modern async formatter plugin
+  
+  `stevearc/conform.nvim`
+  
+  **Configured formatters**:
+  - Lua: `stylua`
+  - Python: `isort`, `black`
+  - Rust: `rustfmt`
+  - JavaScript/TypeScript: `prettierd` or `prettier`
+  
+  **Keybinding**: `<leader>f` to format current buffer
+  
+  ```lua
+  use({
+    "stevearc/conform.nvim",
+    config = function()
+      require("conform").setup({
+          formatters_by_ft = {
+              lua = { "stylua" },
+              python = { "isort", "black" },
+              rust = { "rustfmt", lsp_format = "fallback" },
+              javascript = { "prettierd", "prettier", stop_after_first = true },
+              typescript = { "prettierd", "prettier", stop_after_first = true },
+          },
+      })
+    end,
+  })
+  ```
+</ParamField>
+
+## Navigation & File Management
+
+### Fuzzy Finder
+
+<ParamField path="Telescope.nvim" type="fuzzy-finder">
+  Highly extendable fuzzy finder over lists
+  
+  `nvim-telescope/telescope.nvim`
+  
+  **Keybindings**:
+  - `<C-p>` - Find files
+  - `<C-/>` or `<C-;>` - Live grep (search text)
+  
+  ```lua
+  use {
+      'nvim-telescope/telescope.nvim', 
+      tag = '0.1.5',
+      requires = { { 'nvim-lua/plenary.nvim' } }
+  }
+  ```
+  
+  <Info>
+  Configured in `after/plugin/telescope.lua`
+  </Info>
+</ParamField>
+
+### Quick File Navigation
+
+<CardGroup cols={2}>
+  <Card title="Harpoon" icon="anchor">
+    Quick file marking and navigation
+    
+    `ThePrimeagen/harpoon`
+    
+    **Keybindings**:
+    - `<leader>m` - Mark file
+    - `<S-m>` - Toggle menu
+    - `<leader>ma/s/d/f` - Jump to marks 1-4
+  </Card>
+  <Card title="Neo-tree" icon="folder-tree">
+    File explorer sidebar
+    
+    `nvim-neo-tree/neo-tree.nvim`
+    
+    **Keybinding**: `<leader>n` - Toggle
+    
+    **Position**: Right side
+  </Card>
+</CardGroup>
+
+```lua lua/fastfist/packer.lua
+use {
+    'ThePrimeagen/harpoon',
+    requires = { { 'nvim-lua/plenary.nvim' } }
+}
+
+use {
+    "nvim-neo-tree/neo-tree.nvim",
+    branch = "v2.x",
+    requires = {
+        "nvim-lua/plenary.nvim",
+        "nvim-tree/nvim-web-devicons",
+        "MunifTanjim/nui.nvim",
+    }
+}
+```
+
+<Tip>
+Neo-tree is configured to appear on the right side of the screen. See `after/plugin/neo-tree.lua` for custom mappings.
+</Tip>
+
+### Undo History
+
+<ParamField path="Undotree" type="undo-visualizer">
+  Visualize and navigate undo history
+  
+  `mbbill/undotree`
+  
+  **Keybinding**: `<leader>u` - Toggle undotree
+  
+  ```lua
+  use 'mbbill/undotree'
+  ```
+  
+  <Info>
+  Works with persistent undo configured in `vim.opt.undodir`
+  </Info>
+</ParamField>
+
+## Git Integration
+
+<CardGroup cols={3}>
+  <Card title="Neogit" icon="git">
+    Magit-like Git interface
+    
+    `TimUntersberger/neogit`
+    
+    **Keybindings**:
+    - `<leader>gs` or `<C-g>`
+  </Card>
+  <Card title="Git Signs" icon="code-branch">
+    Git decorations in sign column
+    
+    `lewis6991/gitsigns.nvim`
+    
+    Shows added/modified/deleted lines
+  </Card>
+  <Card title="Diffview" icon="code-compare">
+    Enhanced diff viewing
+    
+    `sindrets/diffview.nvim`
+    
+    Required by Neogit
+  </Card>
+  <Card title="Blamer" icon="user">
+    Git blame inline annotations
+    
+    `APZelos/blamer.nvim`
+    
+    Enabled by default
+  </Card>
+</CardGroup>
+
+```lua lua/fastfist/packer.lua
+use {
+    'TimUntersberger/neogit',
+    requires = {
+        'nvim-lua/plenary.nvim',
+        'sindrets/diffview.nvim'
+    }
+}
+
+use {
+    'lewis6991/gitsigns.nvim',
+    config = function()
+        require('gitsigns').setup()
+    end
+}
+
+use { 'APZelos/blamer.nvim' }
+```
+
+<Note>
+Neogit is configured to open in floating mode. See `after/plugin/neogit.lua` for the custom `openFloating()` function.
+</Note>
+
+## Syntax & Highlighting
+
+### TreeSitter
+
+<ParamField path="nvim-treesitter" type="parser">
+  Advanced syntax highlighting and code understanding
+  
+  `nvim-treesitter/nvim-treesitter`
+  
+  **Installed parsers**:
+  - C, Lua, Rust, TypeScript, JavaScript, Solidity, Nushell
+  
+  **Features**:
+  - Syntax highlighting
+  - Incremental selection (`<C-k>`, `<C-j>`, `<C-s>`)
+  - Smart indentation
+  
+  ```lua
+  use('nvim-treesitter/nvim-treesitter', { run = ':TSUpdate' })
+  ```
+  
+  <Info>
+  Configured in `after/plugin/treesitter.lua` with auto-install enabled
+  </Info>
+</ParamField>
+
+<ParamField path="treesitter-context" type="context">
+  Shows code context at the top of the window
+  
+  `nvim-treesitter/nvim-treesitter-context`
+  
+  Displays function/class name when scrolling
+  
+  ```lua
+  use {
+      "nvim-treesitter/nvim-treesitter-context",
+      dependencies = {
+          { "nushell/tree-sitter-nu", build = ":TSUpdate nu" },
+      },
+      build = ":TSUpdate",
+  }
+  ```
+</ParamField>
+
+## UI & Appearance
+
+### Status Line
+
+<ParamField path="Lualine" type="statusline">
+  Fast and customizable statusline
+  
+  `nvim-lualine/lualine.nvim`
+  
+  **Theme**: gruvbox
+  
+  **Shows**:
+  - Mode, branch, diagnostics
+  - Filename with path
+  - Attached LSP clients
+  - File type, diff, location
+  
+  ```lua
+  use {
+      'nvim-lualine/lualine.nvim',
+      requires = { 'kyazdani42/nvim-web-devicons', opt = true }
+  }
+  ```
+  
+  <Info>
+  Custom configuration in `after/plugin/lualine.lua` includes LSP client display
+  </Info>
+</ParamField>
+
+### Color Schemes
+
+<CardGroup cols={3}>
+  <Card title="Gruvbox Baby" icon="palette">
+    `luisiacc/gruvbox-baby`
+    
+    **Default theme**
+  </Card>
+  <Card title="Rose Pine" icon="palette">
+    `rose-pine/neovim`
+    
+    Variant: moon
+  </Card>
+  <Card title="Nord" icon="palette">
+    `shaunsingh/nord.nvim`
+  </Card>
+  <Card title="Dracula" icon="palette">
+    `Mofiqul/dracula.nvim`
+  </Card>
+  <Card title="Tokyo Night" icon="palette">
+    `folke/tokyonight.nvim`
+  </Card>
+</CardGroup>
+
+```lua lua/fastfist/packer.lua
+use 'shaunsingh/nord.nvim'
+use 'Mofiqul/dracula.nvim'
+use({ 'rose-pine/neovim', as = 'rose-pine' })
+use { 'luisiacc/gruvbox-baby', branch = 'main' }
+use 'folke/tokyonight.nvim'
+```
+
+<Tip>
+Change the theme by editing the `color()` function call in `after/plugin/colors.lua` or by calling `:lua color('theme-name')`
+</Tip>
+
+### Visual Enhancements
+
+<CardGroup cols={3}>
+  <Card title="Indent Blankline" icon="bars">
+    Indentation guides
+    
+    `lukas-reineke/indent-blankline.nvim`
+    
+    Character: `┊`
+  </Card>
+  <Card title="Zen Mode" icon="circle-dot">
+    Distraction-free writing
+    
+    `folke/zen-mode.nvim`
+    
+    **Keybinding**: `<leader>gg`
+  </Card>
+  <Card title="Markview" icon="markdown">
+    Enhanced Markdown rendering
+    
+    `OXY2DEV/markview.nvim`
+  </Card>
+</CardGroup>
+
+```lua lua/fastfist/packer.lua
+use "lukas-reineke/indent-blankline.nvim"
+use "folke/zen-mode.nvim"
+use {
+    "OXY2DEV/markview.nvim",
+    dependencies = {
+        "nvim-treesitter/nvim-treesitter",
+        "nvim-tree/nvim-web-devicons"
+    }
+}
+```
+
+## AI & Completion
+
+<CardGroup cols={2}>
+  <Card title="Codeium" icon="robot">
+    Free AI code completion
+    
+    `Exafunction/codeium.vim`
+    
+    **Keybinding**: `<M-CR>` (Alt+Enter) to accept
+  </Card>
+  <Card title="CodeCompanion" icon="comments">
+    AI chat interface for Neovim
+    
+    `olimorris/codecompanion.nvim`
+  </Card>
+</CardGroup>
+
+```lua lua/fastfist/packer.lua
+use 'Exafunction/codeium.vim'
+
+use({
+    "olimorris/codecompanion.nvim",
+    config = function()
+        require("codecompanion").setup()
+    end,
+    requires = {
+        "nvim-lua/plenary.nvim",
+        "nvim-treesitter/nvim-treesitter",
+    }
+})
+```
+
+<Warning>
+Codeium requires account setup. Visit [codeium.com](https://codeium.com) to create an account and authenticate.
+</Warning>
+
+## Utility Plugins
+
+<AccordionGroup>
+  <Accordion title="Comment.nvim" icon="comment">
+    Smart commenting with motion support
+    
+    `numToStr/Comment.nvim`
+    
+    ```lua
+    use {
+        'numToStr/Comment.nvim',
+        config = function()
+            require('Comment').setup()
+        end
+    }
+    ```
+    
+    Auto-configured with setup in packer.lua
+  </Accordion>
+  
+  <Accordion title="vim-sleuth" icon="magnifying-glass">
+    Automatic indentation detection
+    
+    `tpope/vim-sleuth`
+    
+    ```lua
+    use 'tpope/vim-sleuth'
+    ```
+    
+    Automatically detects and adjusts `tabstop` and `shiftwidth` based on file content
+  </Accordion>
+  
+  <Accordion title="Notifier" icon="bell">
+    Notification system
+    
+    `vigoux/notifier.nvim`
+    
+    ```lua
+    use {
+        "vigoux/notifier.nvim",
+        config = function()
+            require 'notifier'.setup {}
+        end
+    }
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Dependencies
+
+Several plugins require `plenary.nvim`, a common Lua utility library:
+
+<ParamField path="plenary.nvim" type="library">
+  Common Lua utility functions
+  
+  `nvim-lua/plenary.nvim`
+  
+  Required by:
+  - Telescope
+  - Harpoon
+  - Neogit
+  - YAML Companion
+  - CodeCompanion
+</ParamField>
+
+<ParamField path="nvim-web-devicons" type="icons">
+  File type icons
+  
+  `nvim-tree/nvim-web-devicons`
+  
+  Used by:
+  - Neo-tree
+  - Lualine
+  - Markview
+</ParamField>
+
+## Plugin Loading Mechanism
+
+<Steps>
+  <Step title="Declaration">
+    Plugins are declared in `lua/fastfist/packer.lua` using Packer's `use` syntax
+  </Step>
+  <Step title="Installation">
+    Run `:PackerSync` to install/update plugins
+  </Step>
+  <Step title="Auto-configuration">
+    Plugins with `config` functions are configured immediately (e.g., Comment, Conform)
+  </Step>
+  <Step title="After-plugin Configuration">
+    Plugins without inline config are configured in `after/plugin/*.lua` files
+  </Step>
+</Steps>
+
+<Info>
+The `after/plugin/` convention means Neovim automatically sources these files after all plugins are loaded, ensuring proper initialization order.
+</Info>
+
+## Plugin Configuration Summary
+
+| Plugin | Configuration File | Has Keybindings |
+|--------|-------------------|------------------|
+| Telescope | `telescope.lua` | Yes |
+| Harpoon | `harpoon.lua` | Yes |
+| Neo-tree | `neo-tree.lua` | Yes |
+| Neogit | `neogit.lua` | Yes |
+| LSP | `lsp.lua` | Yes |
+| Undotree | `undotree.lua` | Yes |
+| Zen Mode | `zenmode.lua` | Yes |
+| TreeSitter | `treesitter.lua` | Yes |
+| Lualine | `lualine.lua` | No |
+| Colors | `colors.lua` | No |
+| Blamer | `blamer.lua` | No |
+| Indent Blankline | `indent-blankline.lua` | No |
+| Git Signs | Inline config | No |
+| Comment | Inline config | Uses default |
+| Conform | Inline config | Uses LSP bindings |
+
+## Adding New Plugins
+
+<Steps>
+  <Step title="Add to packer.lua">
+    Add a `use` statement in `lua/fastfist/packer.lua`:
+    
+    ```lua
+    use 'author/plugin-name'
+    ```
+  </Step>
+  <Step title="Install">
+    Run `:PackerSync` in Neovim
+  </Step>
+  <Step title="Configure (if needed)">
+    Create a new file in `after/plugin/` named `plugin-name.lua` with configuration
+  </Step>
+  <Step title="Add keybindings">
+    Add any keybindings in your `after/plugin/` configuration file
+  </Step>
+</Steps>
+
+<Tip>
+For simple plugins that don't need configuration, you can add them to packer.lua without creating an after/plugin file.
+</Tip>
+
+## Next Steps
+
+<CardGroup cols={3}>
+  <Card title="Keybindings" icon="keyboard" href="/configuration/keybindings">
+    View all plugin keybindings
+  </Card>
+  <Card title="Settings" icon="sliders" href="/configuration/settings">
+    See vim.opt settings
+  </Card>
+  <Card title="Overview" icon="book" href="/configuration/overview">
+    Back to configuration overview
+  </Card>
+</CardGroup>

@@ -1,0 +1,596 @@
+---
+title: "Visual Plugins"
+description: "Color schemes, lualine, indent guides, zen-mode, and markview for enhanced visual experience"
+---
+
+## Overview
+
+Visual plugins enhance the appearance and readability of your Neovim environment. This configuration includes multiple themes, a customized statusline, and visual aids:
+
+<CardGroup cols={2}>
+  <Card title="Color Schemes" icon="palette">
+    5 beautiful themes to choose from
+  </Card>
+  <Card title="Lualine" icon="signal">
+    Customizable statusline
+  </Card>
+  <Card title="Indent Guides" icon="bars">
+    Visual indentation markers
+  </Card>
+  <Card title="Zen Mode" icon="zen">
+    Distraction-free writing
+  </Card>
+</CardGroup>
+
+## Color Schemes
+
+This configuration includes five carefully selected color schemes:
+
+### Installed Themes
+
+```lua lua/fastfist/packer.lua:145-149
+use 'shaunsingh/nord.nvim'
+use 'Mofiqul/dracula.nvim'
+use({ 'rose-pine/neovim', as = 'rose-pine' })
+use { 'luisiacc/gruvbox-baby', branch = 'main' }
+use 'folke/tokyonight.nvim'
+```
+
+<AccordionGroup>
+  <Accordion title="gruvbox-baby (Default)">
+    A softer, more vibrant take on the classic Gruvbox theme.
+    
+    **Features:**
+    - Warm, retro colors
+    - High contrast
+    - Easy on the eyes for long coding sessions
+    - Default theme in this configuration
+  </Accordion>
+  
+  <Accordion title="nord">
+    An arctic, north-bluish color palette.
+    
+    **Features:**
+    - Cool blue tones
+    - Calm and professional appearance
+    - Excellent for focus
+    - Configured with contrast and borders enabled
+  </Accordion>
+  
+  <Accordion title="rose-pine">
+    A natural, elegant color scheme with moon variant.
+    
+    **Features:**
+    - Soft, muted colors
+    - Low-contrast design
+    - Easy on the eyes in any lighting
+    - Uses 'moon' variant by default
+  </Accordion>
+  
+  <Accordion title="dracula">
+    A dark theme with vibrant, punchy colors.
+    
+    **Features:**
+    - High saturation
+    - Bold and energetic
+    - Popular across many editors
+    - Great for presentations
+  </Accordion>
+  
+  <Accordion title="tokyonight">
+    A clean, dark Neovim theme inspired by Tokyo's nighttime lights.
+    
+    **Features:**
+    - Multiple variants available
+    - Modern aesthetics
+    - Excellent syntax highlighting
+    - Well-maintained and popular
+  </Accordion>
+</AccordionGroup>
+
+### Theme Configuration
+
+Themes are configured in `after/plugin/colors.lua:1-27`:
+
+```lua after/plugin/colors.lua
+-- Nord theme settings
+vim.g.nord_contrast = true
+vim.g.nord_borders = true
+vim.g.nord_disable_background = false
+vim.g.nord_italic = true
+vim.g.nord_uniform_diff_background = true
+vim.g.nord_bold = true
+
+-- Color switcher function
+function color(color)
+    my_color = color or "gruvbox-baby"
+    vim.cmd.colorscheme(my_color)
+
+    vim.api.nvim_set_hl(0, "Normal", { bg = "none" })
+    vim.api.nvim_set_hl(0, "NormalFloat", { bg = "none" })
+
+    require("ibl").setup {
+        indent = { char = '┊', },
+        scope = { enabled = false, },
+    }
+end
+
+-- Rose-pine configuration
+require "rose-pine".setup({
+    variant = "moon",
+    dark_variant = "main",
+})
+
+color()
+```
+
+### Switching Themes
+
+You can switch themes using the `color()` function:
+
+<CodeGroup>
+
+```vim Switch to gruvbox-baby
+:lua color("gruvbox-baby")
+```
+
+```vim Switch to nord
+:lua color("nord")
+```
+
+```vim Switch to rose-pine
+:lua color("rose-pine")
+```
+
+```vim Switch to dracula
+:lua color("dracula")
+```
+
+```vim Switch to tokyonight
+:lua color("tokyonight")
+```
+
+</CodeGroup>
+
+<Tip>
+The `color()` function also sets transparent backgrounds for Normal and NormalFloat highlight groups, giving a modern, integrated look with your terminal.
+</Tip>
+
+### Theme Customization
+
+The `color()` function does three things:
+
+<Steps>
+  <Step title="Apply the color scheme">
+    Sets the specified color scheme (or gruvbox-baby by default)
+  </Step>
+  
+  <Step title="Enable transparency">
+    Removes the background from Normal and NormalFloat windows
+    
+    ```lua
+    vim.api.nvim_set_hl(0, "Normal", { bg = "none" })
+    vim.api.nvim_set_hl(0, "NormalFloat", { bg = "none" })
+    ```
+  </Step>
+  
+  <Step title="Configure indent guides">
+    Sets up indent-blankline with the current theme
+  </Step>
+</Steps>
+
+## Lualine
+
+[lualine.nvim](https://github.com/nvim-lualine/lualine.nvim) is a fast and customizable statusline plugin.
+
+### Installation
+
+```lua lua/fastfist/packer.lua:141-143
+use {
+    'nvim-lualine/lualine.nvim',
+    requires = { 'kyazdani42/nvim-web-devicons', opt = true }
+}
+```
+
+### Configuration
+
+Lualine is configured with a custom layout in `after/plugin/lualine.lua:1-92`:
+
+```lua after/plugin/lualine.lua
+local function attached_clients()
+  local clients = vim.lsp.get_clients()
+  if next(clients) == nil then
+    return ''
+  end
+
+  local client_names = ""
+  for i, client in pairs(clients) do
+    if i == 1 then
+      client_names = client_names .. client.name
+    else
+      client_names = client_names .. ' | ' .. client.name
+    end
+  end
+  return client_names
+end
+
+local theme = "gruvbox"
+
+require('lualine').setup {
+  options = {
+    theme = theme,
+    icons_enabled = true,
+    component_separators = '|',
+    section_separators = { left = '', right = '' },
+  },
+  sections = {
+    lualine_a = { 'mode' },
+    lualine_b = { 'branch', 'diagnostics' },
+    lualine_c = {
+      {
+        'filename',
+        path = 1,
+      },
+    },
+    lualine_x = { attached_clients, 'filetype' },
+    lualine_y = { 'diff' },
+    lualine_z = { 'location' }
+  },
+}
+
+vim.opt.winbar = "%f %m"
+vim.opt.laststatus = 3
+```
+
+### Statusline Layout
+
+The statusline is organized into six sections:
+
+<ResponseField name="Section A" type="left">
+  **Mode** - Current Vim mode (NORMAL, INSERT, VISUAL, etc.)
+</ResponseField>
+
+<ResponseField name="Section B" type="left">
+  **Branch** - Git branch name
+  
+  **Diagnostics** - LSP diagnostic counts (errors, warnings, etc.)
+</ResponseField>
+
+<ResponseField name="Section C" type="left">
+  **Filename** - Current file path (relative to project root)
+</ResponseField>
+
+<ResponseField name="Section X" type="right">
+  **LSP Clients** - Names of attached LSP servers
+  
+  **Filetype** - Current file type
+</ResponseField>
+
+<ResponseField name="Section Y" type="right">
+  **Diff** - Git diff statistics (+additions, ~modifications, -deletions)
+</ResponseField>
+
+<ResponseField name="Section Z" type="right">
+  **Location** - Current line and column number
+</ResponseField>
+
+### Custom Components
+
+<AccordionGroup>
+  <Accordion title="Attached LSP Clients">
+    The `attached_clients()` function displays all LSP servers currently attached to the buffer:
+    
+    ```lua
+    local function attached_clients()
+      local clients = vim.lsp.get_clients()
+      if next(clients) == nil then
+        return ''
+      end
+    
+      local client_names = ""
+      for i, client in pairs(clients) do
+        if i == 1 then
+          client_names = client_names .. client.name
+        else
+          client_names = client_names .. ' | ' .. client.name
+        end
+      end
+      return client_names
+    end
+    ```
+    
+    This helps you see which language servers are active at a glance.
+  </Accordion>
+  
+  <Accordion title="Filename with Path">
+    The filename component is configured to show the relative path:
+    
+    ```lua
+    {
+      'filename',
+      path = 1,  -- 0 = filename only, 1 = relative path, 2 = absolute path
+    }
+    ```
+  </Accordion>
+  
+  <Accordion title="Global Statusline">
+    The configuration uses a single global statusline:
+    
+    ```lua
+    vim.opt.laststatus = 3  -- Global statusline
+    ```
+    
+    This shows one statusline at the bottom instead of one per window.
+  </Accordion>
+  
+  <Accordion title="Window Bar">
+    Each window also has a winbar showing the filename:
+    
+    ```lua
+    vim.opt.winbar = "%f %m"  -- filename + modified flag
+    ```
+  </Accordion>
+</AccordionGroup>
+
+### Visual Example
+
+<CodeGroup>
+
+```text Lualine Layout
+┌────────────────────────────────────────────────────────────────┐
+│ NORMAL  main  3✘ 1⚠  src/main.lua  rust-analyzer | lua_ls  +2 ~1  45:12 │
+│   A       B        B        C              X           X       Y      Z   │
+└────────────────────────────────────────────────────────────────┘
+```
+
+</CodeGroup>
+
+<Info>
+Lualine automatically changes colors based on the current mode (INSERT is green, VISUAL is purple, etc.)
+</Info>
+
+## Indent-blankline
+
+[indent-blankline.nvim](https://github.com/lukas-reineke/indent-blankline.nvim) adds visual indentation guides to your code.
+
+### Installation
+
+```lua lua/fastfist/packer.lua:138
+use "lukas-reineke/indent-blankline.nvim"
+```
+
+### Configuration
+
+Indent guides are configured in `after/plugin/indent-blankline.lua:1-6` and also as part of the `color()` function:
+
+```lua after/plugin/indent-blankline.lua
+require("ibl").setup {
+    indent = { char = '┊', },
+    scope = { enabled = false, },
+}
+```
+
+### Features
+
+<ParamField path="indent.char" type="string" default="┊">
+  The character used for indentation guides. The configuration uses a vertical line character `┊`.
+</ParamField>
+
+<ParamField path="scope.enabled" type="boolean" default="false">
+  Scope highlighting is disabled to keep the visual appearance clean and minimal.
+</ParamField>
+
+<Tip>
+Indent guides help you see the structure of your code at a glance, especially useful for languages like Python or YAML where indentation is significant.
+</Tip>
+
+## Zen Mode
+
+[zen-mode.nvim](https://github.com/folke/zen-mode.nvim) provides a distraction-free writing environment by centering your code and hiding UI elements.
+
+### Installation
+
+```lua lua/fastfist/packer.lua:139
+use "folke/zen-mode.nvim"
+```
+
+### Configuration
+
+Zen mode is configured with custom settings in `after/plugin/zenmode.lua:1-19`:
+
+```lua after/plugin/zenmode.lua
+vim.keymap.set("n", "<leader>gg", function()
+    require("zen-mode").setup {
+        on_open = function(win)
+            vim.cmd("setlocal winblend=0")
+            vim.cmd("setlocal spell! spelllang=en_us")
+            vim.cmd("setlocal noexpandtab")
+            vim.cmd("map j gj")
+            vim.cmd("map k gk")
+            vim.cmd("map $ g$")
+            vim.cmd("map 0 g0")
+            vim.opt.wrap = true
+        end,
+        on_close = function(win)
+            vim.opt.wrap = false
+            vim.cmd("setlocal spell! spelllang=en_us")
+        end
+    }
+    require("zen-mode").toggle()
+end)
+```
+
+### Keybindings
+
+<ParamField path="<leader>gg" type="keymap">
+  Toggle zen mode with custom writing-friendly settings
+</ParamField>
+
+### Zen Mode Features
+
+When you enter zen mode, several things happen:
+
+<Tabs>
+  <Tab title="On Open">
+    <ResponseField name="Window Transparency" type="disabled">
+      `winblend=0` ensures the window is opaque
+    </ResponseField>
+    
+    <ResponseField name="Spell Check" type="enabled">
+      English spell checking is enabled
+    </ResponseField>
+    
+    <ResponseField name="Soft Wrap" type="enabled">
+      Long lines wrap at the window edge
+    </ResponseField>
+    
+    <ResponseField name="Visual Line Navigation" type="enabled">
+      `j/k` move by visual lines, not actual lines
+      
+      `0/$` move to visual line start/end
+    </ResponseField>
+    
+    <ResponseField name="Tab Handling" type="changed">
+      `noexpandtab` uses tab characters instead of spaces
+    </ResponseField>
+  </Tab>
+  
+  <Tab title="On Close">
+    <ResponseField name="Soft Wrap" type="disabled">
+      Line wrapping is turned off
+    </ResponseField>
+    
+    <ResponseField name="Spell Check" type="toggled">
+      Spell checking is toggled off
+    </ResponseField>
+    
+    <Info>
+    Other settings automatically revert to buffer defaults
+    </Info>
+  </Tab>
+</Tabs>
+
+### When to Use Zen Mode
+
+<AccordionGroup>
+  <Accordion title="Writing Documentation">
+    Zen mode is perfect for writing markdown files, README documents, or code comments without distractions.
+  </Accordion>
+  
+  <Accordion title="Focused Coding">
+    Remove all distractions when you need deep focus on a single file.
+  </Accordion>
+  
+  <Accordion title="Presentations">
+    Use zen mode during live coding sessions or presentations to focus attention on the code.
+  </Accordion>
+  
+  <Accordion title="Reading Code">
+    When reviewing unfamiliar code, zen mode helps you focus on understanding without visual clutter.
+  </Accordion>
+</AccordionGroup>
+
+<Tip>
+The spell check and soft wrap features make zen mode especially useful for writing prose, documentation, or comments.
+</Tip>
+
+## Markview
+
+[markview.nvim](https://github.com/OXY2DEV/markview.nvim) provides enhanced markdown rendering directly in Neovim.
+
+### Installation
+
+```lua lua/fastfist/packer.lua:124-130
+use {
+    "OXY2DEV/markview.nvim",
+    dependencies = {
+        "nvim-treesitter/nvim-treesitter",
+        "nvim-tree/nvim-web-devicons"
+    }
+}
+```
+
+<Note>
+Markview uses default configuration and automatically activates in markdown files.
+</Note>
+
+### Features
+
+<CardGroup cols={2}>
+  <Card title="Live Preview" icon="eye">
+    See formatted markdown while you edit
+  </Card>
+  
+  <Card title="Syntax Highlighting" icon="code">
+    Enhanced code block rendering
+  </Card>
+  
+  <Card title="Icons" icon="icons">
+    Beautiful icons for lists and special elements
+  </Card>
+  
+  <Card title="Tables" icon="table">
+    Improved table visualization
+  </Card>
+</CardGroup>
+
+## Visual Configuration Summary
+
+Here's how all the visual plugins work together:
+
+<Steps>
+  <Step title="Choose a theme">
+    Use `color("theme-name")` to set your preferred color scheme
+  </Step>
+  
+  <Step title="Statusline information">
+    Lualine shows mode, git info, LSP status, and more
+  </Step>
+  
+  <Step title="Code structure">
+    Indent-blankline provides visual guides for code structure
+  </Step>
+  
+  <Step title="Focused writing">
+    Toggle zen mode with `<leader>gg` for distraction-free coding
+  </Step>
+  
+  <Step title="Markdown files">
+    Markview automatically enhances markdown file appearance
+  </Step>
+</Steps>
+
+## Quick Reference
+
+<CardGroup cols={2}>
+  <Card title="Switch Theme" icon="palette">
+    ```vim
+    :lua color("theme-name")
+    ```
+  </Card>
+  
+  <Card title="Toggle Zen Mode" icon="zen">
+    ```
+    <leader>gg
+    ```
+  </Card>
+  
+  <Card title="Available Themes" icon="swatchbook">
+    - gruvbox-baby (default)
+    - nord
+    - rose-pine
+    - dracula
+    - tokyonight
+  </Card>
+  
+  <Card title="Statusline" icon="signal">
+    Always visible with:
+    - Mode, Git info
+    - Diagnostics, LSP clients
+    - File info, Location
+  </Card>
+</CardGroup>
+
+<Info>
+All visual plugins are designed to work together harmoniously, providing a beautiful and functional editing environment.
+</Info>

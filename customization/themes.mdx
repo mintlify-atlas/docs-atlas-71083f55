@@ -1,0 +1,194 @@
+---
+title: "Customizing Themes"
+description: "Learn how to customize color schemes and themes in your Neovim configuration"
+---
+
+## Overview
+
+Your Neovim configuration includes a flexible theming system that allows you to easily switch between color schemes and customize their appearance. The theme configuration is located in `after/plugin/colors.lua`.
+
+## Switching Themes
+
+The configuration provides a custom `color()` function that handles theme switching and applies transparent background settings:
+
+```lua after/plugin/colors.lua
+function color(color)
+    my_color = color or "gruvbox-baby"
+    vim.cmd.colorscheme(my_color)
+
+    vim.api.nvim_set_hl(0, "Normal", { bg = "none" })
+    vim.api.nvim_set_hl(0, "NormalFloat", { bg = "none" })
+
+    require("ibl").setup {
+        indent = { char = '┊', },
+        scope = { enabled = false, },
+    }
+end
+
+color()
+```
+
+<Note>
+The `color()` function automatically applies transparent backgrounds for both normal windows and floating windows after setting the colorscheme.
+</Note>
+
+## Available Themes
+
+The configuration comes with several pre-installed themes:
+
+- **gruvbox-baby** (default)
+- **rose-pine**
+- **nord**
+
+### Theme-Specific Configuration
+
+#### Rose Pine
+
+The Rose Pine theme is pre-configured with the moon variant:
+
+```lua after/plugin/colors.lua
+require "rose-pine".setup({
+    variant = "moon",
+    dark_variant = "main",
+})
+```
+
+#### Nord
+
+Nord theme settings are configured with these global variables:
+
+```lua after/plugin/colors.lua
+vim.g.nord_contrast = true
+vim.g.nord_borders = true
+vim.g.nord_disable_background = false
+vim.g.nord_italic = true
+vim.g.nord_uniform_diff_background = true
+vim.g.nord_bold = true
+```
+
+## Changing Your Theme
+
+<Steps>
+  <Step title="Open the colors configuration">
+    Edit `after/plugin/colors.lua` in your Neovim configuration directory.
+  </Step>
+  
+  <Step title="Modify the color() call">
+    Change the default theme by passing a different theme name to the `color()` function:
+    
+    ```lua
+    color("rose-pine")
+    ```
+  </Step>
+  
+  <Step title="Reload your configuration">
+    Restart Neovim or source the file with `:source %` to apply changes.
+  </Step>
+</Steps>
+
+## Adding New Themes
+
+To add a new color scheme to your configuration:
+
+<Steps>
+  <Step title="Install the theme plugin">
+    Add the theme to your plugin manager in `lua/fastfist/packer.lua`:
+    
+    ```lua
+    use 'folke/tokyonight.nvim'
+    ```
+  </Step>
+  
+  <Step title="Run PackerSync">
+    Install the new plugin:
+    
+    ```vim
+    :PackerSync
+    ```
+    
+    Or use the keybinding: `<leader>s`
+  </Step>
+  
+  <Step title="Configure the theme (optional)">
+    Add any theme-specific configuration before the `color()` call:
+    
+    ```lua
+    require('tokyonight').setup({
+        style = "storm",
+        transparent = false,
+    })
+    ```
+  </Step>
+  
+  <Step title="Switch to the new theme">
+    Update the `color()` function call:
+    
+    ```lua
+    color("tokyonight")
+    ```
+  </Step>
+</Steps>
+
+## Transparent Background
+
+The `color()` function automatically sets transparent backgrounds by clearing the background highlight for normal and floating windows:
+
+```lua
+vim.api.nvim_set_hl(0, "Normal", { bg = "none" })
+vim.api.nvim_set_hl(0, "NormalFloat", { bg = "none" })
+```
+
+### Disabling Transparent Background
+
+To disable transparent backgrounds, simply comment out or remove these lines from the `color()` function:
+
+```lua
+function color(color)
+    my_color = color or "gruvbox-baby"
+    vim.cmd.colorscheme(my_color)
+
+    -- vim.api.nvim_set_hl(0, "Normal", { bg = "none" })
+    -- vim.api.nvim_set_hl(0, "NormalFloat", { bg = "none" })
+
+    require("ibl").setup {
+        indent = { char = '┊', },
+        scope = { enabled = false, },
+    }
+end
+```
+
+<Warning>
+Make sure your terminal emulator supports transparency if you want to see through to your terminal background.
+</Warning>
+
+## Runtime Theme Switching
+
+You can switch themes on-the-fly without restarting Neovim by calling the `color()` function from the command line:
+
+<CodeGroup>
+```vim Switch to Rose Pine
+:lua color("rose-pine")
+```
+
+```vim Switch to Nord
+:lua color("nord")
+```
+
+```vim Switch to Gruvbox Baby
+:lua color("gruvbox-baby")
+```
+</CodeGroup>
+
+## Customizing Indent Guides
+
+The `color()` function also configures indent-blankline (ibl) settings. You can customize the indent guide character:
+
+```lua
+require("ibl").setup {
+    indent = { 
+        char = '│',  -- Change this to your preferred character
+        -- Options: '┊', '│', '▏', '┆'
+    },
+    scope = { enabled = false, },
+}
+```

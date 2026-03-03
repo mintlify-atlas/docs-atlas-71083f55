@@ -1,0 +1,427 @@
+---
+title: Keybindings
+description: Complete reference of all keybindings in the Neovim configuration
+---
+
+<Info>
+The leader key is set to **Space** (`<Space>`)
+</Info>
+
+```lua
+vim.g.mapleader = " "
+```
+
+## Global Keybindings
+
+These keybindings are defined in `lua/fastfist/remap.lua` and are available globally across all buffers.
+
+### Visual Mode Editing
+
+<ParamField path="J" type="visual">
+  Move selected lines down
+  ```lua
+  vim.keymap.set("v", "J", ":m '>+1<CR>gv=gv")
+  ```
+</ParamField>
+
+<ParamField path="K" type="visual">
+  Move selected lines up
+  ```lua
+  vim.keymap.set("v", "K", ":m '<-2<CR>gv=gv")
+  ```
+</ParamField>
+
+<Tip>
+These visual mode bindings allow you to move entire selections up and down while maintaining proper indentation.
+</Tip>
+
+### Navigation & Scrolling
+
+| Keybinding | Mode | Description | Source |
+|------------|------|-------------|--------|
+| `<C-d>` | Normal | Scroll down half-page and center cursor | remap.lua:7 |
+| `<C-u>` | Normal | Scroll up half-page and center cursor | remap.lua:8 |
+| `n` | Normal | Next search result (centered) | remap.lua:9 |
+| `N` | Normal | Previous search result (centered) | remap.lua:10 |
+
+```lua
+vim.keymap.set("n", "<C-d>", "<C-d>zz")
+vim.keymap.set("n", "<C-u>", "<C-u>zz")
+vim.keymap.set("n", "n", "nzzzv")
+vim.keymap.set("n", "N", "Nzzzv")
+```
+
+### Window Navigation
+
+<CardGroup cols={2}>
+  <Card title="Left" icon="arrow-left">
+    `<C-h>` - Move to left window
+  </Card>
+  <Card title="Down" icon="arrow-down">
+    `<C-j>` - Move to window below
+  </Card>
+  <Card title="Up" icon="arrow-up">
+    `<C-k>` - Move to window above
+  </Card>
+  <Card title="Right" icon="arrow-right">
+    `<C-l>` - Move to right window
+  </Card>
+</CardGroup>
+
+```lua
+vim.keymap.set("n", "<C-l>", "<C-W>l")
+vim.keymap.set("n", "<C-h>", "<C-W>h")
+vim.keymap.set("n", "<C-j>", "<C-W>j")
+vim.keymap.set("n", "<C-k>", "<C-W>k")
+```
+
+### Terminal Mode
+
+<ParamField path="<Esc>" type="terminal">
+  Exit terminal mode to normal mode
+  ```lua
+  vim.keymap.set("t", "<Esc>", "<C-\\><C-n>")
+  ```
+</ParamField>
+
+### Quickfix Navigation
+
+| Keybinding | Description |
+|------------|-------------|
+| `<S-l>` | Go to next item in quickfix list |
+| `<S-h>` | Go to previous item in quickfix list |
+
+```lua
+vim.keymap.set("n", "<S-l>", ":cnext<CR>")
+vim.keymap.set("n", "<S-h>", ":cprev<CR>")
+```
+
+### Utility Commands
+
+| Keybinding | Description | Source |
+|------------|-------------|--------|
+| `<leader>b` | Run yarn build | remap.lua:21 |
+| `<leader>s` | Run PackerSync | remap.lua:22 |
+| `<leader>y` | Use system clipboard for yank (normal) | remap.lua:23 |
+| `<leader>y` | Use system clipboard for yank (visual) | remap.lua:24 |
+
+```lua
+vim.keymap.set("n", "<leader>b", ":!yarn build<CR>")
+vim.keymap.set("n", "<leader>s", ":PackerSync<CR>")
+vim.keymap.set("n", "<leader>y", '"+"')
+vim.keymap.set("x", "<leader>y", '"+y')
+```
+
+## Telescope (Fuzzy Finder)
+
+Defined in `after/plugin/telescope.lua`
+
+<CardGroup cols={3}>
+  <Card title="Find Files" icon="file">
+    `<C-p>` - Search for files in project
+  </Card>
+  <Card title="Live Grep" icon="magnifying-glass">
+    `<C-_>` or `<C-;>` - Search text in project
+  </Card>
+</CardGroup>
+
+```lua after/plugin/telescope.lua
+local builtin = require('telescope.builtin')
+vim.keymap.set('n', '<C-p>', builtin.find_files, {})
+vim.keymap.set('n', '<C-_>', builtin.live_grep, {})
+vim.keymap.set('n', '<C-;>', builtin.live_grep, {})
+```
+
+<Note>
+`<C-_>` is the terminal representation of `Ctrl+/` on most terminals.
+</Note>
+
+## Harpoon (Quick File Navigation)
+
+Defined in `after/plugin/harpoon.lua`
+
+### Mark Management
+
+| Keybinding | Description |
+|------------|-------------|
+| `<leader>m` | Add current file to Harpoon marks |
+| `<S-m>` | Toggle Harpoon quick menu |
+
+```lua
+vim.keymap.set("n", "<leader>m", mark.add_file)
+vim.keymap.set("n", "<S-m>", ui.toggle_quick_menu)
+```
+
+### Terminal Navigation
+
+<CardGroup cols={2}>
+  <Card title="Terminal 1" icon="terminal">
+    `<leader>ta` - Go to terminal 1
+  </Card>
+  <Card title="Terminal 2" icon="terminal">
+    `<leader>ts` - Go to terminal 2
+  </Card>
+  <Card title="Terminal 3" icon="terminal">
+    `<leader>td` - Go to terminal 3
+  </Card>
+  <Card title="Terminal 4" icon="terminal">
+    `<leader>tf` - Go to terminal 4
+  </Card>
+</CardGroup>
+
+```lua
+vim.keymap.set("n", "<leader>ta", function() term.gotoTerminal(1) end)
+vim.keymap.set("n", "<leader>ts", function() term.gotoTerminal(2) end)
+vim.keymap.set("n", "<leader>td", function() term.gotoTerminal(3) end)
+vim.keymap.set("n", "<leader>tf", function() term.gotoTerminal(4) end)
+```
+
+### File Navigation
+
+<CardGroup cols={2}>
+  <Card title="Mark 1" icon="1">
+    `<leader>ma` - Jump to mark 1
+  </Card>
+  <Card title="Mark 2" icon="2">
+    `<leader>ms` - Jump to mark 2
+  </Card>
+  <Card title="Mark 3" icon="3">
+    `<leader>md` - Jump to mark 3
+  </Card>
+  <Card title="Mark 4" icon="4">
+    `<leader>mf` - Jump to mark 4
+  </Card>
+</CardGroup>
+
+```lua
+vim.keymap.set("n", "<leader>ma", function() ui.nav_file(1) end)
+vim.keymap.set("n", "<leader>ms", function() ui.nav_file(2) end)
+vim.keymap.set("n", "<leader>md", function() ui.nav_file(3) end)
+vim.keymap.set("n", "<leader>mf", function() ui.nav_file(4) end)
+```
+
+<Tip>
+Harpoon allows you to mark up to 4 files for quick switching. Use `<leader>m` to mark files and `<leader>ma/s/d/f` to jump between them.
+</Tip>
+
+## LSP (Language Server Protocol)
+
+Defined in `after/plugin/lsp.lua`
+
+### Code Navigation
+
+| Keybinding | Description | Source |
+|------------|-------------|--------|
+| `gd` | Go to definition | lsp.lua:99 |
+| `gr` | Show references | lsp.lua:107 |
+| `K` | Show hover documentation | lsp.lua:100 |
+| `<leader>vws` | Search workspace symbols | lsp.lua:101 |
+
+```lua
+vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts)
+vim.keymap.set("n", "gr", vim.lsp.buf.references, opts)
+vim.keymap.set("n", "K", vim.lsp.buf.hover, opts)
+vim.keymap.set("n", "<leader>vws", vim.lsp.buf.workspace_symbol, opts)
+```
+
+### Diagnostics
+
+<CardGroup cols={3}>
+  <Card title="Show Diagnostic" icon="circle-info">
+    `<leader>vd` - Open diagnostic float
+  </Card>
+  <Card title="Next Diagnostic" icon="arrow-down">
+    `]d` - Go to next diagnostic
+  </Card>
+  <Card title="Previous Diagnostic" icon="arrow-up">
+    `[d` - Go to previous diagnostic
+  </Card>
+</CardGroup>
+
+```lua
+vim.keymap.set("n", "<leader>vd", vim.diagnostic.open_float, opts)
+vim.keymap.set("n", "]d", vim.diagnostic.goto_next, opts)
+vim.keymap.set("n", "[d", vim.diagnostic.goto_prev, opts)
+```
+
+### Code Actions & Refactoring
+
+| Keybinding | Mode | Description |
+|------------|------|-------------|
+| `<leader>ca` | Normal | Show code actions |
+| `<leader>a` | Visual | Show code actions for selection |
+| `<leader>rn` | Normal | Rename symbol |
+| `<F2>` | Normal | Rename symbol (alternative) |
+| `<leader>f` | Normal | Format buffer |
+
+```lua
+vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, opts)
+vim.keymap.set("x", "<leader>a", vim.lsp.buf.code_action, opts)
+vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename, opts)
+vim.keymap.set("n", "<F2>", vim.lsp.buf.rename, opts)
+vim.keymap.set("n", "<leader>f", conform.format)
+```
+
+### Rust-Specific (Rust-Tools)
+
+| Keybinding | Description |
+|------------|-------------|
+| `K` | Show hover actions (enhanced for Rust) |
+| `<leader>t` | Open Cargo.toml |
+
+```lua
+vim.keymap.set("n", "K", rt.hover_actions.hover_actions, opts)
+vim.keymap.set("n", "<leader>t", rt.open_cargo_toml.open_cargo_toml, opts)
+```
+
+### Completion (nvim-cmp)
+
+Defined in insert mode during completion:
+
+| Keybinding | Description |
+|------------|-------------|
+| `<C-e>` | Scroll docs up |
+| `<C-y>` | Scroll docs down |
+| `<C-p>` | Select previous completion item |
+| `<C-n>` | Select next completion item |
+| `<CR>` | Confirm selection |
+| `<C-Space>` | Trigger completion |
+
+```lua
+cmp.setup({
+    mapping = cmp.mapping.preset.insert({
+        ['<C-e>'] = cmp.mapping.scroll_docs(-4),
+        ['<C-y>'] = cmp.mapping.scroll_docs(4),
+        ['<C-p>'] = cmp.mapping.select_prev_item(cmp_select),
+        ['<C-n>'] = cmp.mapping.select_next_item(cmp_select),
+        ['<CR>'] = cmp.mapping.confirm({ select = true }),
+        ['<C-Space>'] = cmp.mapping.complete(),
+    })
+})
+```
+
+### AI Completion (Codeium)
+
+| Keybinding | Mode | Description |
+|------------|------|-------------|
+| `<M-CR>` | Insert | Accept Codeium suggestion |
+
+```lua
+vim.api.nvim_set_keymap('i', '<M-CR>', 'codeium#Accept()', { expr=true, noremap = true, silent = true })
+```
+
+<Note>
+`<M-CR>` means `Alt+Enter` or `Option+Enter` on Mac.
+</Note>
+
+## Git Integration
+
+### Neogit
+
+Defined in `after/plugin/neogit.lua`
+
+<CardGroup cols={2}>
+  <Card title="Git Status" icon="git">
+    `<leader>gs` - Open Neogit in floating window
+  </Card>
+  <Card title="Quick Git" icon="git">
+    `<C-g>` - Open Neogit in floating window
+  </Card>
+</CardGroup>
+
+```lua
+vim.keymap.set("n", "<leader>gs", M.openFloating)
+vim.keymap.set("n", "<C-g>", M.openFloating)
+```
+
+## File Explorer
+
+### Neo-tree
+
+Defined in `after/plugin/neo-tree.lua`
+
+<ParamField path="<leader>n" type="normal">
+  Toggle Neo-tree file explorer on the right side
+  ```lua
+  vim.keymap.set("n", "<leader>n", ":Neotree toggle<cr>")
+  ```
+</ParamField>
+
+## Undo History
+
+### Undotree
+
+Defined in `after/plugin/undotree.lua`
+
+<ParamField path="<leader>u" type="normal">
+  Toggle undo tree visualization
+  ```lua
+  vim.keymap.set("n", "<leader>u", vim.cmd.UndotreeToggle)
+  ```
+</ParamField>
+
+## Zen Mode
+
+Defined in `after/plugin/zenmode.lua`
+
+<ParamField path="<leader>gg" type="normal">
+  Toggle distraction-free writing mode
+  
+  Enables:
+  - Word wrap
+  - Spell checking (en_us)
+  - Modified j/k/0/$ for wrapped line navigation
+  
+  ```lua
+  vim.keymap.set("n", "<leader>gg", function()
+      require("zen-mode").toggle()
+  end)
+  ```
+</ParamField>
+
+## TreeSitter (Incremental Selection)
+
+Defined in `after/plugin/treesitter.lua`
+
+| Keybinding | Description |
+|------------|-------------|
+| `<C-k>` | Incrementally select larger syntax node |
+| `<C-s>` | Increment scope selection |
+| `<C-j>` | Decrement syntax node selection |
+
+```lua
+incremental_selection = {
+    enable = true,
+    keymaps = {
+        node_incremental = '<c-k>',
+        scope_incremental = '<c-s>',
+        node_decremental = '<c-j>',
+    }
+}
+```
+
+## Quick Reference
+
+<AccordionGroup>
+  <Accordion title="Most Used Keybindings">
+    - `<C-p>` - Find files
+    - `<C-/>` - Search text
+    - `<leader>n` - Toggle file explorer
+    - `<leader>gs` - Git status
+    - `gd` - Go to definition
+    - `<leader>ca` - Code actions
+    - `<leader>f` - Format code
+  </Accordion>
+  
+  <Accordion title="Leader Key Commands">
+    All commands starting with `<leader>` require pressing Space first:
+    - Space → `n` for file explorer
+    - Space → `gs` for git status
+    - Space → `ca` for code actions
+    - Space → `f` for formatting
+  </Accordion>
+</AccordionGroup>
+
+<Tip>
+You can view the leader key by running `:echo mapleader` in Neovim. It's set to Space in this configuration.
+</Tip>
