@@ -1,0 +1,85 @@
+{
+  "projectType": "general",
+  "projectName": "Neovim Config",
+  "projectDescription": "A comprehensive Neovim configuration with LSP, Treesitter, Telescope, and custom Nushell integration",
+  "theme": "aspen",
+  "primaryColor": "#d79921",
+  "lightColor": "#fabd2f",
+  "darkColor": "#b57614",
+  "navigation": {
+    "groups": [
+      {
+        "group": "Getting Started",
+        "pages": [
+          "introduction",
+          "installation",
+          "quickstart"
+        ]
+      },
+      {
+        "group": "Configuration",
+        "pages": [
+          "configuration/overview",
+          "configuration/keybindings",
+          "configuration/settings",
+          "configuration/plugins"
+        ]
+      },
+      {
+        "group": "Features",
+        "pages": [
+          "features/lsp",
+          "features/telescope",
+          "features/harpoon",
+          "features/git-integration",
+          "features/nushell",
+          "features/treesitter",
+          "features/formatting"
+        ]
+      },
+      {
+        "group": "Plugins",
+        "pages": [
+          "plugins/overview",
+          "plugins/navigation",
+          "plugins/editing",
+          "plugins/visual",
+          "plugins/ai-completion"
+        ]
+      },
+      {
+        "group": "Customization",
+        "pages": [
+          "customization/themes",
+          "customization/lsp-servers",
+          "customization/key-mappings",
+          "customization/file-types"
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "LSP integration with Mason for multiple languages",
+    "Custom Nushell and Zsh command execution",
+    "Telescope fuzzy finder with live grep",
+    "Harpoon for quick file navigation",
+    "Git integration with Neogit, Gitsigns, and Blamer",
+    "Treesitter syntax highlighting",
+    "Code formatting with Conform",
+    "AI code completion with Codeium",
+    "Multiple color schemes (Gruvbox, Nord, Rose Pine, Tokyo Night)"
+  ],
+  "publicApiSurface": [
+    "require('fastfist')",
+    "require('fastfist.nushell').setup()",
+    "color(scheme)",
+    "NuRun command",
+    "<leader>m - Mark file with Harpoon",
+    "<C-p> - Telescope find files",
+    "<C-n> - Run with Nushell",
+    "<leader>f - Format code",
+    "gd - Go to definition",
+    "gr - Go to references",
+    "<leader>ca - Code actions"
+  ]
+}
